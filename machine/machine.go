@@ -1,4 +1,4 @@
-package main
+package machine
 
 type Machine struct {
 	Hostname    string
