@@ -7,14 +7,13 @@ import (
 	"testing"
 )
 
-// Replace /script/checkin/{scriptName}
-// with /script/checkin/test for all routes
-// If endpoint doesn't have any replacments return unchanged endpoint
+// Replace endpoint parameters with values
 func replace(endpoint string) string {
 	apiVars := map[string]string{
-		"{scriptId}":   "1",
-		"{scriptName}": "test",
-		"{mailId}":     "test@example.com",
+		"{groupId}":   "1",
+		"{requestId}": "1",
+		"{machineId}": "1",
+		"{file}":      "testfile.txt",
 	}
 	for key, val := range apiVars {
 		newStr := strings.Replace(endpoint, key, val, -1)
