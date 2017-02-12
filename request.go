@@ -10,6 +10,7 @@ type Request struct {
 	DownloadPath string
 	MatchCount   int
 	Machines     []Machine
+	History      []MatchHistory
 }
 
 type MatchHistory struct {
