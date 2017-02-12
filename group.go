@@ -1,6 +1,6 @@
 package main
 
-import "reflect"
+import "fmt"
 
 type Group struct {
 	ID            uint   `json:"id" gorm:"primary_key"`
@@ -18,8 +18,20 @@ func findGroup(id string) (*Group, error) {
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	if reflect.DeepEqual(Group{}, result.Value) {
-		return nil, nil
-	}
 	return &group, nil
+}
+
+func deleteGroup(id string) error {
+	result := Db.Delete(Group{}, "ID LIKE ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("record not found")
+	}
+	// There is a chance Gorm will delete everything so thats bad.
+	if result.RowsAffected > 1 {
+		return fmt.Errorf("bluk deletion")
+	}
+	return nil
 }

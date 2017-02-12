@@ -43,7 +43,7 @@ func GroupsShow(w http.ResponseWriter, r *http.Request) {
 	group, err := findGroup(mux.Vars(r)["groupId"])
 	res := Response{}
 	if err != nil {
-		res = Response{Status{400, "Not found"}, nil}
+		res = Response{Status{400, err.Error()}, nil}
 	} else {
 		res = Response{Status{200, ""}, group}
 	}
@@ -52,4 +52,12 @@ func GroupsShow(w http.ResponseWriter, r *http.Request) {
 
 func GroupsDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	err := deleteGroup(mux.Vars(r)["groupId"])
+	res := Response{}
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+	} else {
+		res = Response{Status{200, ""}, nil}
+	}
+	json.NewEncoder(w).Encode(res)
 }
