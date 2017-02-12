@@ -1,9 +1,6 @@
 package main
 
 import (
-	"github.com/chaselengel/lilac/group"
-	"github.com/chaselengel/lilac/machine"
-	"github.com/chaselengel/lilac/request"
 	"net/http"
 )
 
@@ -27,79 +24,85 @@ var routes = Routes{
 		"Groups",
 		"GET",
 		"/groups",
-		groups.Groups,
+		Groups,
 	},
 	Route{
 		"GroupsCheck",
 		"POST",
 		"/groups/check",
-		groups.GroupsCheck,
+		GroupsCheck,
 	},
 	Route{
 		"GroupsNotifications",
 		"GET",
 		"/groups/{groupId}/notifications",
-		groups.GroupsNotifications,
+		GroupsNotifications,
+	},
+	Route{
+		"GroupsCreate",
+		"POST",
+		"/groups",
+		GroupsCreate,
 	},
 	Route{
 		"GroupsShow",
 		"GET",
 		"/groups/{groupId}",
-		groups.GroupsShow,
+		GroupsShow,
 	},
 	Route{
 		"GroupsDelete",
 		"DELETE",
 		"/groups/{groupId}",
-		groups.GroupsDelete,
+		GroupsDelete,
 	},
 	Route{
 		"Requests",
 		"GET",
 		"/groups/{groupId}/requests",
-		request.Requests,
+		Requests,
 	},
 	Route{
 		"RequestsCreate",
 		"POST",
 		"/group/{groupId}/requests{requestId}",
-		request.RequestsCreate,
+		RequestsCreate,
 	},
 	Route{
 		"RequestsDelete",
 		"DELETE",
 		"/group/{groupId}/requests{requestId}",
-		request.RequestsCreate,
+		RequestsCreate,
 	},
 	Route{
 		"RequestsHistory",
 		"GET",
 		"/group/{groupId}/requests{requestId}/history",
-		request.RequestsHistory,
+		RequestsHistory,
 	},
 	Route{
 		"Machines",
 		"GET",
 		"/machines",
-		machine.Machines,
+		Machines,
 	},
 	Route{
 		"MachinesShow",
 		"GET",
 		"/machines/{machineId}",
-		machine.MachinesShow,
+		MachinesShow,
 	},
 	Route{
 		"MachinesCreate",
 		"POST",
 		"/machines",
-		machine.MachinesCreate,
+		MachinesCreate,
 	},
 	Route{
 		"MachinesDelete",
 		"DELETE",
 		"/machines/{machineId}",
-		machine.MachinesDelete,
+		MachinesDelete,
 	},
 	Route{
 		"Transfer",

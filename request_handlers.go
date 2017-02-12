@@ -1,4 +1,4 @@
-package request
+package main
 
 import "net/http"
 

@@ -1,4 +1,4 @@
-package constraint
+package main
 
 type Constraint struct {
 	Size int

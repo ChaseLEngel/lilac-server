@@ -1,7 +1,6 @@
-package request
+package main
 
 import (
-	"github.com/chaselengel/lilac/machine"
 	"time"
 )
 
@@ -10,7 +9,7 @@ type Request struct {
 	Name         string
 	DownloadPath string
 	MatchCount   int
-	Machines     []machine.Machine
+	Machines     []Machine
 }
 
 type MatchHistory struct {
