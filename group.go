@@ -1,13 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Group struct {
 	ID            uint           `json:"id" gorm:"primary_key"`
 	Name          string         `json:"name"`
 	DownloadPath  string         `json:"downloadpath"`
 	Link          string         `json:"link"`
-	Request       []Request      `json:"-"`
+	Request       []Request      `json:"-" gorm:"ForeignKey:GroupRefer"`
 	Constraints   []Constraint   `json:"-"`
 	Notifications []Notification `json:"-"`
 }
