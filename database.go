@@ -7,9 +7,9 @@ import (
 
 var Db *gorm.DB
 
-func initDatabase() error {
+func initDatabase(file string) error {
 	var err error
-	Db, err = gorm.Open("sqlite3", "lilac.db")
+	Db, err = gorm.Open("sqlite3", file)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := initDatabase()
+	err := initDatabase("production.db")
 	if err != nil {
 		panic("Failed to init database")
 	}

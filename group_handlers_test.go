@@ -3,9 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -14,34 +13,29 @@ var mockGroup = Group{
 	DownloadPath:  "downloads",
 	Link:          "examplefeed.com",
 	Request:       nil,
-	History:       nil,
 	Constraints:   nil,
 	Notifications: nil,
 }
 
 func TestMain(m *testing.M) {
-	var err error
-	err = initDatabase()
-	if err != nil {
-		panic("Failed to init the database.")
-	}
-
+	setup()
 	m.Run()
+	teardown()
 }
 
-func TestGroupsCreateEmpty(t *testing.T) {
+func TestCreateEmpty(t *testing.T) {
 	var expected = Response{
 		Status: Status{400, "No body"},
 		Data:   nil,
 	}
-	req, err := http.NewRequest("POST", "/groups", nil)
+	route, err := getRoute("GroupsCreate")
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(GroupsCreate)
-	handler.ServeHTTP(recorder, req)
-
+	recorder, err := setupRecorder(route, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var actual Response
 	err = json.NewDecoder(recorder.Body).Decode(&actual)
 	if err != nil {
@@ -52,24 +46,25 @@ func TestGroupsCreateEmpty(t *testing.T) {
 	}
 }
 
-func TestGroupsCreate(t *testing.T) {
+func TestCreate(t *testing.T) {
 	var expected = Response{
 		Status: Status{200, ""},
 		Data:   nil,
 	}
+	var actual Response
 	b, err := json.Marshal(mockGroup)
 	if err != nil {
 		t.Fatal(err)
 	}
 	body := bytes.NewReader(b)
-	req, err := http.NewRequest("POST", "/groups", body)
+	route, err := getRoute("GroupsCreate")
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(GroupsCreate)
-	handler.ServeHTTP(recorder, req)
-	var actual Response
+	recorder, err := setupRecorder(route, body)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = json.NewDecoder(recorder.Body).Decode(&actual)
 	if err != nil {
 		t.Fatal(err)
@@ -80,19 +75,25 @@ func TestGroupsCreate(t *testing.T) {
 }
 
 func TestGroups(t *testing.T) {
-	var expected = Response{
-		Status: Status{200, ""},
-		Data:   &mockGroup,
-	}
-	req, err := http.NewRequest("GET", "/groups", nil)
+	groups, err := allGroups()
 	if err != nil {
 		t.Fatal(err)
 	}
-	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(Groups)
-	handler.ServeHTTP(recorder, req)
+	var expected = Response{
+		Status: Status{200, ""},
+		Data:   groups,
+	}
 	var actual Response
-	actual.Data = new(Group)
+	actual.Data = new([]Group)
+
+	route, err := getRoute("Groups")
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder, err := setupRecorder(route, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = json.NewDecoder(recorder.Body).Decode(&actual)
 	if err != nil {
 		t.Fatal(err)
@@ -100,5 +101,57 @@ func TestGroups(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("\nExpected %v\nActual %v", expected, actual)
 	}
+}
 
+func TestDelete(t *testing.T) {
+	Db.Create(&mockGroup)
+	groupId := strconv.Itoa(int(mockGroup.ID))
+	var expected = Response{
+		Status: Status{200, ""},
+		Data:   nil,
+	}
+	var actual Response
+	route, err := getRoute("GroupsDelete")
+	if err != nil {
+		t.Fatal(err)
+	}
+	route.Path = replace(groupId, "", "", "", route.Path)
+	recorder, err := setupRecorder(route, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = json.NewDecoder(recorder.Body).Decode(&actual)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("\nPath %v\nExpected %v\nActual %v", route.Path, expected, actual)
+	}
+}
+
+func TestShow(t *testing.T) {
+	Db.Create(&mockGroup)
+	groupId := strconv.Itoa(int(mockGroup.ID))
+	var expected = Response{
+		Status: Status{200, ""},
+		Data:   &mockGroup,
+	}
+	var actual Response
+	actual.Data = new(Group)
+	route, err := getRoute("GroupsShow")
+	if err != nil {
+		t.Fatal(err)
+	}
+	route.Path = replace(groupId, "", "", "", route.Path)
+	recorder, err := setupRecorder(route, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = json.NewDecoder(recorder.Body).Decode(&actual)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("\nPath %v\nExpected %v\nActual %v", route.Path, expected, actual)
+	}
 }

@@ -8,8 +8,13 @@ import (
 
 func Groups(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	groups := Db.Find(&([]Group{})).Value
-	res := Response{Status{200, ""}, groups}
+	groups, err := allGroups()
+	res := Response{}
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+	} else {
+		res = Response{Status{200, ""}, groups}
+	}
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -23,7 +28,6 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 	var g Group
 	json.NewDecoder(r.Body).Decode(&g)
 
-	Db.NewRecord(g)
 	Db.Create(&g)
 
 	res := Response{Status{200, ""}, nil}
