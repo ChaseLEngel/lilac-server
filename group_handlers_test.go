@@ -12,7 +12,7 @@ var mockGroup = Group{
 	Name:          "TestGroup",
 	DownloadPath:  "downloads",
 	Link:          "examplefeed.com",
-	Request:       nil,
+	Requests:      nil,
 	Constraints:   nil,
 	Notifications: nil,
 }
