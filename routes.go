@@ -75,19 +75,19 @@ var routes = Routes{
 	Route{
 		"RequestsCreate",
 		"POST",
-		"/group/{groupId}/requests{requestId}",
+		"/groups/{groupId}/requests",
 		RequestsCreate,
 	},
 	Route{
 		"RequestsDelete",
 		"DELETE",
-		"/group/{groupId}/requests{requestId}",
+		"/groups/{groupId}/requests/{requestId}",
 		RequestsCreate,
 	},
 	Route{
 		"RequestsHistory",
 		"GET",
-		"/group/{groupId}/requests{requestId}/history",
+		"/groups/{groupId}/requests/{requestId}/history",
 		RequestsHistory,
 	},
 	Route{

@@ -5,11 +5,11 @@ import (
 )
 
 type Group struct {
-	ID            uint           `json:"id" gorm:"primary_key"`
+	ID            uint           `json:"group_id"`
 	Name          string         `json:"name"`
-	DownloadPath  string         `json:"downloadpath"`
+	DownloadPath  string         `json:"download_path"`
 	Link          string         `json:"link"`
-	Request       []Request      `json:"-" gorm:"ForeignKey:GroupRefer"`
+	Requests      []Request      `json:"-"`
 	Constraints   []Constraint   `json:"-"`
 	Notifications []Notification `json:"-"`
 }
