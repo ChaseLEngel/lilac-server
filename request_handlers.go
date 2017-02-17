@@ -18,9 +18,10 @@ func Requests(w http.ResponseWriter, r *http.Request) {
 	requests, err := group.allRequests()
 	if err != nil {
 		res = Response{Status{500, err.Error()}, nil}
-	} else {
-		res = Response{Status{200, ""}, requests}
+		json.NewEncoder(w).Encode(res)
+		return
 	}
+	res = Response{Status{200, ""}, requests}
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -52,8 +53,44 @@ func RequestsCreate(w http.ResponseWriter, r *http.Request) {
 
 func RequestsDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	var res Response
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	err = group.deleteRequest(mux.Vars(r)["requestId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	res = Response{Status{200, ""}, nil}
+	json.NewEncoder(w).Encode(res)
 }
 
 func RequestsHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var res Response
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	request, err := group.findRequest(mux.Vars(r)["requestId"])
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	matchHistory, err := request.history()
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	res = Response{Status{200, ""}, matchHistory}
+	json.NewEncoder(w).Encode(res)
 }

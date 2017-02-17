@@ -82,7 +82,7 @@ var routes = Routes{
 		"RequestsDelete",
 		"DELETE",
 		"/groups/{groupId}/requests/{requestId}",
-		RequestsCreate,
+		RequestsDelete,
 	},
 	Route{
 		"RequestsHistory",
