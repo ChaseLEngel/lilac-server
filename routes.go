@@ -79,6 +79,24 @@ var routes = Routes{
 		GroupsConstraintsCreate,
 	},
 	Route{
+		"GroupsConstraintsShow",
+		"GET",
+		"/groups/{groupId}/constraints/{constraintId}",
+		GroupsConstraintsShow,
+	},
+	Route{
+		"GroupsConstraintsDelete",
+		"DELETE",
+		"/groups/{groupId}/constraints/{constraintId}",
+		GroupsConstraintsDelete,
+	},
+	Route{
+		"GroupsConstraintsUpdate",
+		"PUT",
+		"/groups/{groupId}/constraints/{constraintId}",
+		GroupsConstraintsUpdate,
+	},
+	Route{
 		"Requests",
 		"GET",
 		"/groups/{groupId}/requests",

@@ -32,13 +32,13 @@ func RequestsCreate(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	var request Request
 	group, err := findGroup(mux.Vars(r)["groupId"])
 	if err != nil {
 		res := Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
+	var request Request
 	json.NewDecoder(r.Body).Decode(&request)
 
 	if err := group.insertRequest(&request); err != nil {
@@ -47,7 +47,7 @@ func RequestsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := Response{Status{200, ""}, nil}
+	res := Response{Status{200, ""}, request}
 	json.NewEncoder(w).Encode(res)
 }
 

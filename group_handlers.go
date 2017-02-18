@@ -35,7 +35,7 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := Response{Status{200, ""}, nil}
+	res := Response{Status{200, ""}, g}
 	json.NewEncoder(w).Encode(res)
 }
 

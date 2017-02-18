@@ -24,7 +24,7 @@ type Notification struct {
 
 func (group Group) allNotifications() (*[]Notification, error) {
 	var notifications []Notification
-	result := Db.Model(&group).Association("Notifications").Append(notifications)
+	result := Db.Model(&group).Related(&notifications)
 	if result.Error != nil {
 		return nil, result.Error
 	}
