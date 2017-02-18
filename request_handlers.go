@@ -70,6 +70,35 @@ func RequestsDelete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+func RequestsUpdate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	var res Response
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	var request Request
+	err = json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	err = group.updateRequest(mux.Vars(r)["requestId"], &request)
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	res = Response{Status{200, ""}, request}
+	json.NewEncoder(w).Encode(res)
+}
+
 func RequestsHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response

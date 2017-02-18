@@ -81,6 +81,23 @@ func (group Group) deleteRequest(id string) error {
 	return nil
 }
 
+func (group Group) updateRequest(id string, newRequest *Request) error {
+	request, err := group.findRequest(id)
+	if err != nil {
+		return err
+	}
+
+	result := Db.Model(&request).Updates(*newRequest)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// Set the id so when API response is sent things look good.
+	newRequest.ID = request.ID
+
+	return nil
+}
+
 func (request Request) history() ([]MatchHistory, error) {
 	var matchHistory []MatchHistory
 	result := Db.Model(&request).Related(&matchHistory)

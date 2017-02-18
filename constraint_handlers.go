@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GroupsConstraints(w http.ResponseWriter, r *http.Request) {
+func Constraints(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
@@ -26,7 +26,7 @@ func GroupsConstraints(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GroupsConstraintsCreate(w http.ResponseWriter, r *http.Request) {
+func ConstraintsCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 	if r.Body == nil {
@@ -52,7 +52,7 @@ func GroupsConstraintsCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GroupsConstraintsShow(w http.ResponseWriter, r *http.Request) {
+func ConstraintsShow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
@@ -71,7 +71,7 @@ func GroupsConstraintsShow(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GroupsConstraintsDelete(w http.ResponseWriter, r *http.Request) {
+func ConstraintsDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
@@ -90,7 +90,7 @@ func GroupsConstraintsDelete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GroupsConstraintsUpdate(w http.ResponseWriter, r *http.Request) {
+func ConstraintsUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 
