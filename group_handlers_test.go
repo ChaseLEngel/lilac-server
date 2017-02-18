@@ -17,13 +17,9 @@ var mockGroup = Group{
 	Notifications: nil,
 }
 
-func TestMain(m *testing.M) {
+func TestGroupCreateEmpty(t *testing.T) {
 	setup()
-	m.Run()
-	teardown()
-}
-
-func TestCreateEmpty(t *testing.T) {
+	defer teardown()
 	var expected = Response{
 		Status: Status{400, "No body"},
 		Data:   nil,
@@ -46,7 +42,9 @@ func TestCreateEmpty(t *testing.T) {
 	}
 }
 
-func TestCreate(t *testing.T) {
+func TestGroupCreate(t *testing.T) {
+	setup()
+	defer teardown()
 	var expected = Response{
 		Status: Status{200, ""},
 		Data:   nil,
@@ -75,6 +73,8 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGroups(t *testing.T) {
+	setup()
+	defer teardown()
 	groups, err := allGroups()
 	if err != nil {
 		t.Fatal(err)
@@ -103,7 +103,9 @@ func TestGroups(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestGroupDelete(t *testing.T) {
+	setup()
+	defer teardown()
 	Db.Create(&mockGroup)
 	groupId := strconv.Itoa(int(mockGroup.ID))
 	var expected = Response{
@@ -129,7 +131,9 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestShow(t *testing.T) {
+func TestGroupShow(t *testing.T) {
+	setup()
+	defer teardown()
 	Db.Create(&mockGroup)
 	groupId := strconv.Itoa(int(mockGroup.ID))
 	var expected = Response{

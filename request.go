@@ -25,7 +25,15 @@ type MatchHistory struct {
 	File      string    `json:"file"`
 }
 
-func (group Group) insertRequest(request Request) error {
+func (request Request) insertMatchHistory(history *MatchHistory) error {
+	result := Db.Model(&request).Association("History").Append(history)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (group Group) insertRequest(request *Request) error {
 	result := Db.Model(&group).Association("Requests").Append(request)
 	if result.Error != nil {
 		return result.Error
@@ -73,11 +81,11 @@ func (group Group) deleteRequest(id string) error {
 	return nil
 }
 
-func (request Request) history() (*[]MatchHistory, error) {
+func (request Request) history() ([]MatchHistory, error) {
 	var matchHistory []MatchHistory
 	result := Db.Model(&request).Related(&matchHistory)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &matchHistory, nil
+	return matchHistory, nil
 }

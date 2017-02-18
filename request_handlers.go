@@ -41,7 +41,7 @@ func RequestsCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewDecoder(r.Body).Decode(&request)
 
-	if err := group.insertRequest(request); err != nil {
+	if err := group.insertRequest(&request); err != nil {
 		res := Response{Status{500, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return

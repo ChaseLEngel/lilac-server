@@ -29,9 +29,7 @@ func setup() {
 }
 
 func teardown() {
-	Db.DropTable(&Group{})
 	os.Remove("testing.db")
-	defer Db.Close()
 }
 
 // Replace endpoint parameters with values
@@ -43,10 +41,7 @@ func replace(groupId, requestId, machineId, file, endpoint string) string {
 		"{file}":      file,
 	}
 	for key, val := range paras {
-		newStr := strings.Replace(endpoint, key, val, -1)
-		if newStr != endpoint {
-			return newStr
-		}
+		endpoint = strings.Replace(endpoint, key, val, -1)
 	}
 	return endpoint
 }
