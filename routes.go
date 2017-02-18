@@ -43,6 +43,12 @@ var routes = Routes{
 		GroupsCheck,
 	},
 	Route{
+		"GroupsUpdate",
+		"PUT",
+		"/groups/{groupId}",
+		GroupsUpdate,
+	},
+	Route{
 		"GroupsNotifications",
 		"GET",
 		"/groups/{groupId}/notifications",

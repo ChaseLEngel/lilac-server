@@ -68,3 +68,20 @@ func deleteGroup(id string) error {
 	}
 	return nil
 }
+
+func updateGroup(id string, newGroup *Group) error {
+	group, err := findGroup(id)
+	if err != nil {
+		return err
+	}
+
+	result := Db.Model(&group).Updates(*newGroup)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// Set the id so when API response is sent things look good.
+	newGroup.ID = group.ID
+
+	return nil
+}
