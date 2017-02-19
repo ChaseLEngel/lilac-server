@@ -25,17 +25,17 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	var g Group
-	json.NewDecoder(r.Body).Decode(&g)
+	var group Group
+	json.NewDecoder(r.Body).Decode(&group)
 
-	err := insertGroup(&g)
+	err := insertGroup(&group)
 	if err != nil {
 		res := Response{Status{500, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res := Response{Status{200, ""}, g}
+	res := Response{Status{200, ""}, group}
 	json.NewEncoder(w).Encode(res)
 }
 

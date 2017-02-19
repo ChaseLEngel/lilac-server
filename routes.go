@@ -135,25 +135,31 @@ var routes = Routes{
 	Route{
 		"Machines",
 		"GET",
-		"/machines",
+		"/groups/{groupId}/machines",
 		Machines,
 	},
 	Route{
 		"MachinesShow",
 		"GET",
-		"/machines/{machineId}",
+		"/groups/{groupId}/machines/{machineId}",
 		MachinesShow,
 	},
 	Route{
 		"MachinesCreate",
 		"POST",
-		"/machines",
+		"/groups/{groupId}/machines",
 		MachinesCreate,
+	},
+	Route{
+		"MachinesUpdate",
+		"PUT",
+		"/groups/{groupId}/machines/{machineId}",
+		MachinesUpdate,
 	},
 	Route{
 		"MachinesDelete",
 		"DELETE",
-		"/machines/{machineId}",
+		"/groups/{groupId}/machines/{machineId}",
 		MachinesDelete,
 	},
 	Route{

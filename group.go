@@ -10,6 +10,7 @@ type Group struct {
 	Name          string         `json:"name"`
 	DownloadPath  string         `json:"download_path"`
 	Link          string         `json:"link"`
+	Machines      []Machine      `json:"-"`
 	Requests      []Request      `json:"-"`
 	Constraints   []Constraint   `json:"-"`
 	Notifications []Notification `json:"-"`
