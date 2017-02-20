@@ -28,10 +28,10 @@ type Item struct {
 
 func Get(url string) (*Channel, error) {
 	resp, err := http.Get(url)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	channel, err := parse(buf.Bytes())

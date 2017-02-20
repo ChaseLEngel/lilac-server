@@ -23,13 +23,13 @@ type Notification struct {
 	Message   string    `json:"message"`
 }
 
-func (group Group) allNotifications() (*[]Notification, error) {
+func (group Group) allNotifications() ([]Notification, error) {
 	var notifications []Notification
 	result := Db.Model(&group).Related(&notifications)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &notifications, nil
+	return notifications, nil
 }
 
 func insertGroup(group *Group) error {
@@ -40,14 +40,14 @@ func insertGroup(group *Group) error {
 	return nil
 }
 
-func allGroups() (*[]Group, error) {
+func allGroups() ([]Group, error) {
 	groups := []Group{}
 	result := Db.Find(&groups)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return &groups, nil
+	return groups, nil
 }
 
 func findGroup(id string) (*Group, error) {

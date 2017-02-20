@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -44,4 +45,10 @@ func replace(groupId, requestId, machineId, file, endpoint string) string {
 		endpoint = strings.Replace(endpoint, key, val, -1)
 	}
 	return endpoint
+}
+
+// In order to handle Response's Data interface we need test with a json.RawMessage
+type ResponseTesting struct {
+	Status Status          `json:"status"`
+	Data   json.RawMessage `json:"data"`
 }

@@ -41,7 +41,9 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 
 func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	res := Response{Status{200, ""}, nil}
+	var res Response
+	go check()
+	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)
 }
 
