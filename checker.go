@@ -11,24 +11,23 @@ import (
 	"time"
 )
 
-func check() {
-	groups, err := allGroups()
-	if err != nil {
-		return
-	}
+func check(groups []Group) {
 	for _, group := range groups {
 		channel, err := rss.Get(group.Link)
 		if err != nil {
+			fmt.Println("RSS Get error:", err)
 			continue
 		}
 		requests, err := group.allRequests()
 		if err != nil {
+			fmt.Println("allRequests error:", err)
 			continue
 		}
 		group.search(channel.Items, requests)
 	}
 }
 
+// Search RSS items for requests.
 func (group Group) search(items []*rss.Item, requests []Request) {
 	for _, request := range requests {
 		for _, item := range items {
@@ -36,7 +35,6 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			if matched, err := regexp.MatchString(request.Regex, item.Title); !matched || err != nil {
 				continue
 			}
-			fmt.Printf("Matched %v\n", item.Title)
 
 			// Check that we haven't downloaded this item before.
 			inmh := false
@@ -47,8 +45,6 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			}
 			for _, mh := range matchHistory {
 				re := regexp.MustCompile(request.Regex)
-				fmt.Println("item: ", re.FindString(item.Title))
-				fmt.Println("file: ", re.FindString(mh.File))
 				if re.FindString(item.Title) == re.FindString(mh.File) {
 					inmh = true
 					break
@@ -57,7 +53,6 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			if inmh {
 				continue
 			}
-			fmt.Println("Not in history")
 
 			// Request's download path takes priority over Group's
 			var downloadPath string
@@ -73,14 +68,12 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				fmt.Println("Download error: ", err)
 				continue
 			}
-			fmt.Println("Download")
 
 			mh := MatchHistory{Timestamp: time.Now(), Regex: "", File: item.Title}
 			if err := request.insertMatchHistory(&mh); err != nil {
 				fmt.Println("Match History Insert error: ", err)
 				continue
 			}
-			fmt.Printf("Inserted into match history: %#v\n", mh)
 		}
 	}
 }
@@ -101,7 +94,7 @@ func download(url, destination string) error {
 	return nil
 }
 
-// Try to get filename from header.
+// Get filename from header
 func filename(header http.Header) string {
 	content := header.Get("Content-Disposition")
 	if content == "" {

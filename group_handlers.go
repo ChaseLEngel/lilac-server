@@ -39,10 +39,34 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
+// Run check on a single group.
 func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
-	go check()
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	var groups []Group
+	groups = append(groups, *group)
+	go check(groups)
+	res = Response{Status{200, ""}, nil}
+	json.NewEncoder(w).Encode(res)
+}
+
+// Run check on all groups.
+func GroupsCheckAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+	groups, err := allGroups()
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	go check(groups)
 	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)
 }

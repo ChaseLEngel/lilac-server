@@ -40,6 +40,12 @@ var routes = Routes{
 		"GroupsCheck",
 		"POST",
 		"/groups/check",
+		GroupsCheckAll,
+	},
+	Route{
+		"GroupsCheck",
+		"POST",
+		"/groups/{groupId}/check",
 		GroupsCheck,
 	},
 	Route{
