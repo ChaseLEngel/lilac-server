@@ -61,19 +61,16 @@ func (group Group) deleteMachine(id string) error {
 	return nil
 }
 
-func (group Group) updateMachine(id string, newMachine *Machine) error {
+func (group Group) updateMachine(id string, newMachine Machine) (Machine, error) {
 	machine, err := group.findMachine(id)
 	if err != nil {
-		return err
+		return Machine{}, err
 	}
 
-	result := Db.Model(&machine).Updates(*newMachine)
+	result := Db.Model(&machine).Updates(newMachine)
 	if result.Error != nil {
-		return result.Error
+		return Machine{}, result.Error
 	}
 
-	// Set the id so when API response is sent things look good.
-	newMachine.ID = machine.ID
-
-	return nil
+	return machine, nil
 }

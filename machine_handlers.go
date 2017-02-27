@@ -94,14 +94,14 @@ func MachinesUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = group.updateMachine(mux.Vars(r)["machineId"], &machine)
+	updatedMachine, err := group.updateMachine(mux.Vars(r)["machineId"], machine)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, machine}
+	res = Response{Status{200, ""}, updatedMachine}
 	json.NewEncoder(w).Encode(res)
 }
 

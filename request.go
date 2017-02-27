@@ -81,21 +81,18 @@ func (group Group) deleteRequest(id string) error {
 	return nil
 }
 
-func (group Group) updateRequest(id string, newRequest *Request) error {
+func (group Group) updateRequest(id string, newRequest Request) (Request, error) {
 	request, err := group.findRequest(id)
 	if err != nil {
-		return err
+		return Request{}, err
 	}
 
-	result := Db.Model(&request).Updates(*newRequest)
+	result := Db.Model(&request).Updates(newRequest)
 	if result.Error != nil {
-		return result.Error
+		return Request{}, result.Error
 	}
 
-	// Set the id so when API response is sent things look good.
-	newRequest.ID = request.ID
-
-	return nil
+	return request, nil
 }
 
 func (request Request) history() ([]MatchHistory, error) {

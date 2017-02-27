@@ -88,14 +88,14 @@ func RequestsUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = group.updateRequest(mux.Vars(r)["requestId"], &request)
+	updatedRequest, err := group.updateRequest(mux.Vars(r)["requestId"], request)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, request}
+	res = Response{Status{200, ""}, updatedRequest}
 	json.NewEncoder(w).Encode(res)
 }
 

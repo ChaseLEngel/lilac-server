@@ -50,7 +50,7 @@ func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var groups []Group
-	groups = append(groups, *group)
+	groups = append(groups, group)
 	go check(groups)
 	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)
@@ -147,13 +147,13 @@ func GroupsUpdate(w http.ResponseWriter, r *http.Request) {
 	var group Group
 	err := json.NewDecoder(r.Body).Decode(&group)
 
-	err = updateGroup(mux.Vars(r)["groupId"], &group)
+	updatedGroup, err := updateGroup(mux.Vars(r)["groupId"], group)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, group}
+	res = Response{Status{200, ""}, updatedGroup}
 	json.NewEncoder(w).Encode(res)
 }

@@ -47,21 +47,18 @@ func (group Group) findConstraint(id string) (Constraint, error) {
 	return Constraint{}, fmt.Errorf("record not found")
 }
 
-func (group Group) updateConstraint(id string, newCon *Constraint) error {
+func (group Group) updateConstraint(id string, newCon Constraint) (Constraint, error) {
 	constraint, err := group.findConstraint(id)
 	if err != nil {
-		return err
+		return Constraint{}, err
 	}
 
-	result := Db.Model(&constraint).Updates(*newCon)
+	result := Db.Model(&constraint).Updates(newCon)
 	if result.Error != nil {
-		return result.Error
+		return Constraint{}, result.Error
 	}
 
-	// Set the id so when API response is sent things look good.
-	newCon.ID = constraint.ID
-
-	return nil
+	return constraint, nil
 }
 
 func (group Group) deleteConstraint(id string) error {

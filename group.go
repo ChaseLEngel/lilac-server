@@ -50,13 +50,13 @@ func allGroups() ([]Group, error) {
 	return groups, nil
 }
 
-func findGroup(id string) (*Group, error) {
+func findGroup(id string) (Group, error) {
 	group := Group{}
 	result := Db.Where("ID = ?", id).Find(&group)
 	if result.Error != nil {
-		return nil, result.Error
+		return Group{}, result.Error
 	}
-	return &group, nil
+	return group, nil
 }
 
 func deleteGroup(id string) error {
@@ -70,19 +70,16 @@ func deleteGroup(id string) error {
 	return nil
 }
 
-func updateGroup(id string, newGroup *Group) error {
+func updateGroup(id string, newGroup Group) (Group, error) {
 	group, err := findGroup(id)
 	if err != nil {
-		return err
+		return Group{}, err
 	}
 
-	result := Db.Model(&group).Updates(*newGroup)
+	result := Db.Model(&group).Updates(newGroup)
 	if result.Error != nil {
-		return result.Error
+		return Group{}, result.Error
 	}
 
-	// Set the id so when API response is sent things look good.
-	newGroup.ID = group.ID
-
-	return nil
+	return group, nil
 }

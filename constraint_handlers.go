@@ -110,13 +110,13 @@ func ConstraintsUpdate(w http.ResponseWriter, r *http.Request) {
 	var constraint Constraint
 	json.NewDecoder(r.Body).Decode(&constraint)
 
-	err = group.updateConstraint(mux.Vars(r)["constraintId"], &constraint)
+	updatedConstraint, err := group.updateConstraint(mux.Vars(r)["constraintId"], constraint)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, constraint}
+	res = Response{Status{200, ""}, updatedConstraint}
 	json.NewEncoder(w).Encode(res)
 }
