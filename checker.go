@@ -75,15 +75,6 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
-			// Increment request's match count.
-			updatedRequest := new(Request)
-			updatedRequest.MatchCount = request.MatchCount + 1
-			stringID := fmt.Sprint(request.ID)
-			_, err = group.updateRequest(stringID, *updatedRequest)
-			if err != nil {
-				fmt.Println("Failed to updated match count: ", err)
-
-			}
 		}
 	}
 }

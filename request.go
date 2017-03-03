@@ -8,7 +8,7 @@ import (
 
 type Request struct {
 	ID           uint           `gorm:"index" gorm:"AUTO_INCREMENT" json:"request_id"`
-	GroupID      uint           `json:"-"`
+	GroupID      uint           `json:"group_id"`
 	Regex        string         `json:"regex"`
 	Name         string         `json:"name"`
 	DownloadPath string         `json:"download_path"`
@@ -19,7 +19,7 @@ type Request struct {
 
 type MatchHistory struct {
 	ID        uint      `gorm:"index" gorm:"AUTO_INCREMENT" json:"match_history_id"`
-	RequestID uint      `json:"-"`
+	RequestID uint      `json:"request_id"`
 	Timestamp time.Time `json:"timestamp"`
 	Regex     string    `json:"regex"`
 	File      string    `json:"file"`
