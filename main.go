@@ -12,6 +12,6 @@ func main() {
 		panic("Failed to init database")
 	}
 	router := NewRouter()
-	methods := []string{"GET", "POST", "DELETE"}
+	methods := []string{"GET", "POST", "DELETE", "PUT"}
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedMethods(methods))(router)))
 }
