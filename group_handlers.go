@@ -124,13 +124,18 @@ func GroupConstraints(w http.ResponseWriter, r *http.Request) {
 
 func GroupsDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	err := deleteGroup(mux.Vars(r)["groupId"])
 	res := Response{}
+	group, err := findGroup(mux.Vars(r)["groupId"])
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
-	} else {
-		res = Response{Status{200, ""}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
 	}
+	err = deleteGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	res = Response{Status{200, ""}, group}
 	json.NewEncoder(w).Encode(res)
 }
 

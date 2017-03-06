@@ -60,13 +60,19 @@ func RequestsDelete(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
+	request, err := group.findRequest(mux.Vars(r)["requestId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 	err = group.deleteRequest(mux.Vars(r)["requestId"])
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, nil}
+	res = Response{Status{200, ""}, request}
 	json.NewEncoder(w).Encode(res)
 }
 
