@@ -9,6 +9,7 @@ type Group struct {
 	ID            uint           `json:"group_id"`
 	Name          string         `json:"name"`
 	DownloadPath  string         `json:"download_path"`
+	LastChecked   time.Time      `json:"last_checked"`
 	Link          string         `json:"link"`
 	Machines      []Machine      `json:"-"`
 	Requests      []Request      `json:"-"`
@@ -48,6 +49,16 @@ func allGroups() ([]Group, error) {
 	}
 
 	return groups, nil
+}
+
+func (group Group) updateLastChecked() error {
+	updatedGroup := group
+	updatedGroup.LastChecked = time.Now()
+	result := Db.Model(&group).Updates(updatedGroup)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func findGroup(id string) (Group, error) {

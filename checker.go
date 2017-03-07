@@ -13,6 +13,11 @@ import (
 
 func check(groups []Group) {
 	for _, group := range groups {
+		err := group.updateLastChecked()
+		if err != nil {
+			fmt.Println("Failed to update checked:", err)
+			continue
+		}
 		channel, err := rss.Get(group.Link)
 		if err != nil {
 			fmt.Println("RSS Get error:", err)
