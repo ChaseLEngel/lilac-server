@@ -10,7 +10,7 @@ func TestMachines(t *testing.T) {
 	setup()
 	defer teardown()
 	var group Group
-	err := insertGroup(&group)
+	err := group.insert()
 	if err != nil {
 		t.Fatal(err)
 	}

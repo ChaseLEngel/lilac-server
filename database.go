@@ -22,6 +22,7 @@ func initDatabase(file string) error {
 		&Notification{},
 		&Request{},
 		&MatchHistory{},
+		&GroupSettings{},
 	)
 	return nil
 }

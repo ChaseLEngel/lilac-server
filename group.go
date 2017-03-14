@@ -11,6 +11,7 @@ type Group struct {
 	DownloadPath  string         `json:"download_path"`
 	LastChecked   time.Time      `json:"last_checked"`
 	Link          string         `json:"link"`
+	Settings      GroupSettings  `json:"-"`
 	Machines      []Machine      `json:"-"`
 	Requests      []Request      `json:"-"`
 	Constraints   []Constraint   `json:"-"`
@@ -33,8 +34,14 @@ func (group Group) allNotifications() ([]Notification, error) {
 	return notifications, nil
 }
 
-func insertGroup(group *Group) error {
+func (group *Group) insert() error {
 	result := Db.Create(&group)
+	// All groups have settings by default
+	settings := NewGroupSettings(30, false)
+	err := group.insertGroupSettings(settings)
+	if err != nil {
+		return err
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -51,7 +58,7 @@ func allGroups() ([]Group, error) {
 	return groups, nil
 }
 
-func (group Group) updateLastChecked() error {
+func (group *Group) updateLastChecked() error {
 	updatedGroup := group
 	updatedGroup.LastChecked = time.Now()
 	result := Db.Model(&group).Updates(updatedGroup)
@@ -81,16 +88,10 @@ func deleteGroup(id string) error {
 	return nil
 }
 
-func updateGroup(id string, newGroup Group) (Group, error) {
-	group, err := findGroup(id)
-	if err != nil {
-		return Group{}, err
-	}
-
-	result := Db.Model(&group).Updates(newGroup)
+func (group *Group) update(updated Group) error {
+	result := Db.Model(&group).Updates(updated)
 	if result.Error != nil {
-		return Group{}, result.Error
+		return result.Error
 	}
-
-	return group, nil
+	return nil
 }

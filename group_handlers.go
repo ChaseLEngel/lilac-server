@@ -28,7 +28,7 @@ func GroupsCreate(w http.ResponseWriter, r *http.Request) {
 	var group Group
 	json.NewDecoder(r.Body).Decode(&group)
 
-	err := insertGroup(&group)
+	err := group.insert()
 	if err != nil {
 		res := Response{Status{500, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
@@ -51,7 +51,7 @@ func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 	}
 	var groups []Group
 	groups = append(groups, group)
-	go check(groups)
+	check(groups)
 	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)
 }
@@ -149,16 +149,27 @@ func GroupsUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var group Group
-	err := json.NewDecoder(r.Body).Decode(&group)
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		json.NewEncoder(w).Encode(res)
+		return
+	}
 
-	updatedGroup, err := updateGroup(mux.Vars(r)["groupId"], group)
+	var updateGroup Group
+	err = json.NewDecoder(r.Body).Decode(&updateGroup)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, updatedGroup}
+	err = group.update(updateGroup)
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	res = Response{Status{200, ""}, group}
 	json.NewEncoder(w).Encode(res)
 }

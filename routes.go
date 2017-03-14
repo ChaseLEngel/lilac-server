@@ -79,6 +79,18 @@ var routes = Routes{
 		GroupsDelete,
 	},
 	Route{
+		"Settings",
+		"GET",
+		"/groups/{groupId}/settings",
+		Settings,
+	},
+	Route{
+		"SettingsCreate",
+		"POST",
+		"/groups/{groupId}/settings",
+		SettingsCreate,
+	},
+	Route{
 		"Constraints",
 		"GET",
 		"/groups/{groupId}/constraints",

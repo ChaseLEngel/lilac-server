@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/chaselengel/lilac/rss"
+	"github.com/robfig/cron"
 	"io/ioutil"
 	"net/http"
 	"path"
@@ -10,6 +11,27 @@ import (
 	"strings"
 	"time"
 )
+
+// Creates cron jobs for all groups.
+func InitChecker(groups []Group) *cron.Cron {
+	c := cron.New()
+	for _, group := range groups {
+		settings, err := group.GroupSettings()
+		if err != nil {
+			fmt.Println("Failed to get group settings:", err)
+			continue
+		}
+		formated := fmt.Sprintf("0 %v * * * *", settings.Interval)
+		var checkgroup []Group
+		checkgroup = append(checkgroup, group)
+		err = c.AddFunc(formated, func() { check(checkgroup) })
+		if err != nil {
+			fmt.Printf("Failed to add cron for %v\n", group.Name)
+		}
+	}
+	c.Start()
+	return c
+}
 
 func check(groups []Group) {
 	for _, group := range groups {
@@ -56,6 +78,7 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				}
 			}
 			if inmh {
+				fmt.Println("Item already in history")
 				continue
 			}
 
@@ -63,13 +86,14 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			var downloadPath string
 			if request.DownloadPath != "" {
 				downloadPath = request.DownloadPath
-			} else if downloadPath != "" {
+			} else if group.DownloadPath != "" {
 				downloadPath = group.DownloadPath
 			} else {
+				fmt.Println("No download path")
 				continue
 			}
 
-			if err := download(item.Link, downloadPath); err != nil {
+			if err := download(item, downloadPath); err != nil {
 				fmt.Println("Download error: ", err)
 				continue
 			}
@@ -85,8 +109,8 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 }
 
 // Download RSS link to Group's Destination.
-func download(url, destination string) error {
-	resp, err := http.Get(url)
+func download(item *rss.Item, destination string) error {
+	resp, err := http.Get(item.Link)
 	if err != nil {
 		return err
 	}
@@ -96,6 +120,10 @@ func download(url, destination string) error {
 		return err
 	}
 	filename := filename(resp.Header)
+	// No filename was found so just use item's Title.
+	if filename == "" {
+		filename = item.Title
+	}
 	ioutil.WriteFile(path.Join(destination, filename), body, 0644)
 	return nil
 }
