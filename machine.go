@@ -7,7 +7,7 @@ import (
 
 type Machine struct {
 	ID          uint   `json:"machine_id" gorm:"primary_key"`
-	GroupID     uint   `json:"-"`
+	GroupID     uint   `json:"group_id"`
 	Hostname    string `json:"hostname"`
 	Credentials string `json:"credentials"`
 }
