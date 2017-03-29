@@ -2,75 +2,68 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type Machine struct {
-	ID          uint   `json:"machine_id" gorm:"primary_key"`
-	GroupID     uint   `json:"group_id"`
-	Hostname    string `json:"hostname"`
-	Credentials string `json:"credentials"`
+	ID     uint    `json:"machine_id" gorm:"primary_key"`
+	Groups []Group `json:"-" gorm:"many2many:machine_groups;"`
+	Host   string  `json:"host"`
+	Port   string  `json:"port"`
+	User   string  `json:"user"`
 }
 
-func (group Group) allMachines() ([]Machine, error) {
+func allMachines() ([]Machine, error) {
 	var machines []Machine
-	result := Db.Model(&group).Related(&machines)
+	result := Db.Find(&machines)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return machines, nil
 }
 
-func (group Group) insertMachine(machine *Machine) error {
-	result := Db.Model(&group).Association("Machines").Append(machine)
+func findMachine(id string) (*Machine, error) {
+	machine := new(Machine)
+	result := Db.Where("ID = ?", id).Find(machine)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return machine, nil
+
+}
+
+func (machine *Machine) insertGroup(group Group) {
+	Db.Model(machine).Association("Groups").Append(group)
+}
+
+func (machine *Machine) allGroups() []Group {
+	var groups []Group
+	Db.Model(machine).Related(&groups, "Groups")
+	return groups
+}
+
+func (machine *Machine) insert() error {
+	result := Db.Create(&machine)
 	if result.Error != nil {
 		return result.Error
 	}
-
 	return nil
 }
 
-func (group Group) findMachine(id string) (Machine, error) {
-	machines, err := group.allMachines()
-	if err != nil {
-		return Machine{}, err
-	}
-
-	uid, err := strconv.ParseUint(id, 10, 32)
-	if err != nil {
-		return Machine{}, err
-	}
-	for _, machine := range machines {
-		if machine.ID == uint(uid) {
-			return machine, nil
-		}
-	}
-	return Machine{}, fmt.Errorf("record not found")
-}
-
-func (group Group) deleteMachine(id string) error {
-	machine, err := group.findMachine(id)
-	if err != nil {
-		return err
-	}
-	result := Db.Model(&group).Association("Machines").Delete(machine)
+func (machine *Machine) delete() error {
+	result := Db.Delete(machine)
 	if result.Error != nil {
 		return result.Error
 	}
-	Db.Delete(&machine)
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("record not found")
+	}
 	return nil
 }
 
-func (group Group) updateMachine(id string, newMachine Machine) (Machine, error) {
-	machine, err := group.findMachine(id)
-	if err != nil {
-		return Machine{}, err
-	}
-
+func (machine *Machine) update(newMachine Machine) error {
 	result := Db.Model(&machine).Updates(newMachine)
 	if result.Error != nil {
-		return Machine{}, result.Error
+		return result.Error
 	}
-
-	return machine, nil
+	return nil
 }

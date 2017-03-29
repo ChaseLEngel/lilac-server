@@ -9,13 +9,7 @@ import (
 func Machines(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
-	group, err := findGroup(mux.Vars(r)["groupId"])
-	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	machines, err := group.allMachines()
+	machines, err := allMachines()
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
@@ -35,39 +29,11 @@ func MachinesCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	group, err := findGroup(mux.Vars(r)["groupId"])
-	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-
-	var machine Machine
+	machine := new(Machine)
 	json.NewDecoder(r.Body).Decode(&machine)
-	err = group.insertMachine(&machine)
+	err := machine.insert()
 	if err != nil {
 		res = Response{Status{500, err.Error()}, nil}
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	res = Response{Status{200, ""}, machine}
-	json.NewEncoder(w).Encode(res)
-}
-
-func MachinesShow(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var res Response
-
-	group, err := findGroup(mux.Vars(r)["groupId"])
-	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-
-	machine, err := group.findMachine(mux.Vars(r)["machineId"])
-	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -79,29 +45,29 @@ func MachinesUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 
-	group, err := findGroup(mux.Vars(r)["groupId"])
+	var newMachine Machine
+	err := json.NewDecoder(r.Body).Decode(&newMachine)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	var machine Machine
-	err = json.NewDecoder(r.Body).Decode(&machine)
+	machine, err := findMachine(mux.Vars(r)["machineId"])
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	updatedMachine, err := group.updateMachine(mux.Vars(r)["machineId"], machine)
+	err = machine.update(newMachine)
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, updatedMachine}
+	res = Response{Status{200, ""}, machine}
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -109,6 +75,39 @@ func MachinesDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 
+	machine, err := findMachine(mux.Vars(r)["machineId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	machine.delete()
+
+	res = Response{Status{200, ""}, machine}
+	json.NewEncoder(w).Encode(res)
+}
+
+func MachinesGroups(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+
+	machine, err := findMachine(mux.Vars(r)["machineId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	groups := machine.allGroups()
+
+	res = Response{Status{200, ""}, groups}
+	json.NewEncoder(w).Encode(res)
+}
+
+func MachinesGroupInsert(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
@@ -116,12 +115,13 @@ func MachinesDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = group.deleteMachine(mux.Vars(r)["machineId"])
+	machine, err := findMachine(mux.Vars(r)["machineId"])
 	if err != nil {
 		res = Response{Status{400, err.Error()}, nil}
 		json.NewEncoder(w).Encode(res)
 		return
 	}
+	machine.insertGroup(group)
 
 	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)

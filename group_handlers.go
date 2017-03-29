@@ -173,3 +173,73 @@ func GroupsUpdate(w http.ResponseWriter, r *http.Request) {
 	res = Response{Status{200, ""}, group}
 	json.NewEncoder(w).Encode(res)
 }
+
+func GroupsMachinesInsert(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	machine, err := findMachine(mux.Vars(r)["machineId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	group.insertMachine(*machine)
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	res = Response{Status{200, ""}, nil}
+	json.NewEncoder(w).Encode(res)
+}
+
+func GroupsMachines(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	machines := group.allMachines()
+
+	res = Response{Status{200, ""}, machines}
+	json.NewEncoder(w).Encode(res)
+}
+
+func GroupsMachinesDelete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	machine, err := findMachine(mux.Vars(r)["machineId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	group.deleteMachine(machine)
+
+	res = Response{Status{200, ""}, nil}
+	json.NewEncoder(w).Encode(res)
+}
