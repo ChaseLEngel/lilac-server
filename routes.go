@@ -91,6 +91,12 @@ var routes = Routes{
 		GroupsMachinesInsert,
 	},
 	Route{
+		"GroupsMachinesInsertBulk",
+		"POST",
+		"/groups/{groupId}/machines",
+		GroupsMachinesInsertBulk,
+	},
+	Route{
 		"GroupsMachinesDelete",
 		"DELETE",
 		"/groups/{groupId}/machines/{machineId}",

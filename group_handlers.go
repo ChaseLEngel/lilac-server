@@ -243,3 +243,44 @@ func GroupsMachinesDelete(w http.ResponseWriter, r *http.Request) {
 	res = Response{Status{200, ""}, nil}
 	json.NewEncoder(w).Encode(res)
 }
+
+func GroupsMachinesInsertBulk(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	var machine_ids []string
+
+	if r.Body == nil {
+		res = Response{Status{400, "No body"}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	json.NewDecoder(r.Body).Decode(&machine_ids)
+
+	for _, id := range machine_ids {
+		machine, err := findMachine(id)
+		if err != nil {
+			res = Response{Status{400, err.Error()}, nil}
+			json.NewEncoder(w).Encode(res)
+			return
+		}
+
+		group.insertMachine(*machine)
+		if err != nil {
+			res = Response{Status{400, err.Error()}, nil}
+			json.NewEncoder(w).Encode(res)
+			return
+		}
+	}
+
+	res = Response{Status{200, ""}, nil}
+	json.NewEncoder(w).Encode(res)
+}
