@@ -24,6 +24,15 @@ type MatchHistory struct {
 	File      string    `json:"file"`
 }
 
+func (request Request) AllRequestMachines() ([]RequestMachine, error) {
+	var rms []RequestMachine
+	result := Db.Model(&request).Related(&rms)
+	if result.Error != nil {
+		return rms, result.Error
+	}
+	return rms, nil
+}
+
 func (request Request) insertMatchHistory(history *MatchHistory) error {
 	result := Db.Model(&request).Association("History").Append(history)
 	if result.Error != nil {

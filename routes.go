@@ -177,19 +177,19 @@ var routes = Routes{
 	Route{
 		"RequestMachine",
 		"GET",
-		"/request/{requestID}/machines",
+		"/requests/{requestID}/machines",
 		RequestMachines,
 	},
 	Route{
 		"RequestMachineCreate",
 		"POST",
-		"/request/{requestID}/machines",
+		"/requests/{requestID}/machines",
 		RequestMachinesCreate,
 	},
 	Route{
 		"RequestMachineHistory",
 		"GET",
-		"/request/{requestID}/machines/{machineID}/history",
+		"/requests/{requestID}/machines/{machineID}/history",
 		RequestMachinesHistory,
 	},
 	Route{
