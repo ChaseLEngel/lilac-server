@@ -12,7 +12,6 @@ type Group struct {
 	LastChecked   time.Time      `json:"last_checked"`
 	Link          string         `json:"link"`
 	Settings      GroupSettings  `json:"-"`
-	Machines      []Machine      `json:"-" gorm:"many2many:machine_groups;"`
 	Requests      []Request      `json:"-"`
 	Constraints   []Constraint   `json:"-"`
 	Notifications []Notification `json:"-"`
@@ -56,20 +55,6 @@ func allGroups() ([]Group, error) {
 	}
 
 	return groups, nil
-}
-
-func (group *Group) insertMachine(machine Machine) {
-	Db.Model(group).Association("Machines").Append(machine)
-}
-
-func (group *Group) allMachines() []Machine {
-	var machines []Machine
-	Db.Model(group).Related(&machines, "Machines")
-	return machines
-}
-
-func (group *Group) deleteMachine(machine *Machine) {
-	Db.Model(group).Association("Machines").Delete(*machine)
 }
 
 func (group *Group) updateLastChecked() error {

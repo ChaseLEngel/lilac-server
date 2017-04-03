@@ -79,30 +79,6 @@ var routes = Routes{
 		GroupsDelete,
 	},
 	Route{
-		"GroupsMachines",
-		"GET",
-		"/groups/{groupId}/machines",
-		GroupsMachines,
-	},
-	Route{
-		"GroupsMachinesInsert",
-		"POST",
-		"/groups/{groupId}/machines/{machineId}",
-		GroupsMachinesInsert,
-	},
-	Route{
-		"GroupsMachinesInsertBulk",
-		"POST",
-		"/groups/{groupId}/machines",
-		GroupsMachinesInsertBulk,
-	},
-	Route{
-		"GroupsMachinesDelete",
-		"DELETE",
-		"/groups/{groupId}/machines/{machineId}",
-		GroupsMachinesDelete,
-	},
-	Route{
 		"Settings",
 		"GET",
 		"/groups/{groupId}/settings",
@@ -187,18 +163,6 @@ var routes = Routes{
 		MachinesCreate,
 	},
 	Route{
-		"MachinesGroupInsert",
-		"POST",
-		"/machines/{machineId}/groups/{groupId}",
-		MachinesGroupInsert,
-	},
-	Route{
-		"MachinesGroups",
-		"GET",
-		"/machines/{machineId}/groups",
-		MachinesGroups,
-	},
-	Route{
 		"MachinesUpdate",
 		"PUT",
 		"/machines/{machineId}",
@@ -209,6 +173,24 @@ var routes = Routes{
 		"DELETE",
 		"/machines/{machineId}",
 		MachinesDelete,
+	},
+	Route{
+		"RequestMachine",
+		"GET",
+		"/request/{requestID}/machines",
+		RequestMachines,
+	},
+	Route{
+		"RequestMachineCreate",
+		"POST",
+		"/request/{requestID}/machines",
+		RequestMachinesCreate,
+	},
+	Route{
+		"RequestMachineHistory",
+		"GET",
+		"/request/{requestID}/machines/{machineID}/history",
+		RequestMachinesHistory,
 	},
 	Route{
 		"Transfer",

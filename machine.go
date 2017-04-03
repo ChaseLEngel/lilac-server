@@ -5,11 +5,10 @@ import (
 )
 
 type Machine struct {
-	ID     uint    `json:"machine_id" gorm:"primary_key"`
-	Groups []Group `json:"-" gorm:"many2many:machine_groups;"`
-	Host   string  `json:"host"`
-	Port   string  `json:"port"`
-	User   string  `json:"user"`
+	ID   uint   `json:"machine_id" gorm:"primary_key"`
+	Host string `json:"host"`
+	Port string `json:"port"`
+	User string `json:"user"`
 }
 
 func allMachines() ([]Machine, error) {
@@ -29,16 +28,6 @@ func findMachine(id string) (*Machine, error) {
 	}
 	return machine, nil
 
-}
-
-func (machine *Machine) insertGroup(group Group) {
-	Db.Model(machine).Association("Groups").Append(group)
-}
-
-func (machine *Machine) allGroups() []Group {
-	var groups []Group
-	Db.Model(machine).Related(&groups, "Groups")
-	return groups
 }
 
 func (machine *Machine) insert() error {

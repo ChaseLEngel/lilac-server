@@ -7,14 +7,13 @@ import (
 )
 
 type Request struct {
-	ID           uint           `gorm:"index" gorm:"AUTO_INCREMENT" json:"request_id"`
-	GroupID      uint           `json:"group_id"`
-	Regex        string         `json:"regex"`
-	Name         string         `json:"name"`
-	DownloadPath string         `json:"download_path"`
-	MatchCount   int            `json:"match_count"`
-	Machines     []Machine      `json:"-"`
-	History      []MatchHistory `json:"-"`
+	ID              uint             `gorm:"index" gorm:"AUTO_INCREMENT" json:"request_id"`
+	GroupID         uint             `json:"group_id"`
+	Regex           string           `json:"regex"`
+	Name            string           `json:"name"`
+	DownloadPath    string           `json:"download_path"`
+	RequestMachines []RequestMachine `json:"-"`
+	History         []MatchHistory   `json:"-"`
 }
 
 type MatchHistory struct {
