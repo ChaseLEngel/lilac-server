@@ -6,10 +6,10 @@ import (
 )
 
 type RequestMachine struct {
-	ID          uint    `json:"request_machine_id" gorm:"primary_key`
-	RequestID   uint    `json:"request_id"`
-	Machine     Machine `json:"-"`
-	Destination string  `json:"destination"`
+	ID          uint   `json:"request_machine_id" gorm:"primary_key`
+	RequestID   uint   `json:"request_id"`
+	MachineID   uint   `json:"machine_id"`
+	Destination string `json:"destination"`
 }
 
 type TransferHistory struct {

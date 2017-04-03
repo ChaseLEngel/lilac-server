@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -70,10 +69,9 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(res)
 			return
 		}
-		destination := md.Destination
 		var rm RequestMachine
-		rm.Machine = *machine
-		rm.Destination = destination
+		rm.MachineID = machine.ID
+		rm.Destination = md.Destination
 		Db.Model(&request).Association("RequestMachines").Append(&rm)
 	}
 
