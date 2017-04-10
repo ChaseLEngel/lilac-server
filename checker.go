@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/chaselengel/lilac/rss"
+	"github.com/chaselengel/lilac/transfer"
 	"github.com/robfig/cron"
 	"io/ioutil"
 	"net/http"
@@ -93,7 +94,8 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
-			if err := download(item, downloadPath); err != nil {
+			filename, err := download(item, downloadPath)
+			if err != nil {
 				fmt.Println("Download error: ", err)
 				continue
 			}
@@ -104,32 +106,62 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
+			// If group's settings have auto transfer set
+			// then transfer file to request's machines.
+			settings, err := group.GroupSettings()
+			if err != nil {
+				fmt.Println("Failed to get group's settings:", err)
+			}
+			if settings.AutoTransfer {
+				if err := send(request, path.Join(downloadPath, filename)); err != nil {
+					fmt.Println("Failed to transfer file:", err)
+					continue
+				}
+			}
 		}
 	}
 }
 
-// Download RSS link to Group's Destination.
-func download(item *rss.Item, destination string) error {
-	resp, err := http.Get(item.Link)
+// Look up request's requestMachine and start transfer of source file to machines.
+func send(request Request, source string) error {
+	requestMachines, err := request.AllRequestMachines()
 	if err != nil {
 		return err
+	}
+	for _, rm := range requestMachines {
+		machine, err := findMachine(string(rm.MachineID))
+		if err != nil {
+			return err
+		}
+		if err := transfer.Transfer(source, rm.Destination, machine.Host, machine.Port, machine.User); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Download RSS link to Group's Destination.
+func download(item *rss.Item, destination string) (string, error) {
+	resp, err := http.Get(item.Link)
+	if err != nil {
+		return "", err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
-	filename := filename(resp.Header)
+	filename := extractFilename(resp.Header)
 	// No filename was found so just use item's Title.
 	if filename == "" {
 		filename = item.Title
 	}
 	ioutil.WriteFile(path.Join(destination, filename), body, 0644)
-	return nil
+	return filename, nil
 }
 
 // Get filename from header
-func filename(header http.Header) string {
+func extractFilename(header http.Header) string {
 	content := header.Get("Content-Disposition")
 	if content == "" {
 		return ""

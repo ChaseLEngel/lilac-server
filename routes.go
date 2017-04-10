@@ -193,9 +193,9 @@ var routes = Routes{
 		RequestMachinesHistory,
 	},
 	Route{
-		"Transfer",
+		"TransferRequest",
 		"POST",
 		"/tranfer/{file}",
-		transfer,
+		transferRequest,
 	},
 }
