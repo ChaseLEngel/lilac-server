@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,7 +23,7 @@ func InitChecker(groups []Group) *cron.Cron {
 			fmt.Println("Failed to get group settings:", err)
 			continue
 		}
-		formated := fmt.Sprintf("0 %v * * * *", settings.Interval)
+		formated := fmt.Sprintf("@every %vm", settings.Interval)
 		var checkgroup []Group
 		checkgroup = append(checkgroup, group)
 		err = c.AddFunc(formated, func() { check(checkgroup) })
@@ -129,7 +130,7 @@ func send(request Request, source string) error {
 		return err
 	}
 	for _, rm := range requestMachines {
-		machine, err := findMachine(string(rm.MachineID))
+		machine, err := findMachine(strconv.FormatUint(uint64(rm.MachineID), 10))
 		if err != nil {
 			return err
 		}
