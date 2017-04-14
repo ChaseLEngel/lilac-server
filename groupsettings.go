@@ -19,6 +19,12 @@ func (group Group) insertGroupSettings(settings GroupSettings) error {
 	if result.Error != nil {
 		return result.Error
 	}
+	// Assume the interval has changed and
+	// update the cron job with new interval.
+	err := master.ChangeTime(int(settings.GroupId), settings.Interval)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -33,5 +39,14 @@ func (group Group) GroupSettings() (GroupSettings, error) {
 
 func (settings GroupSettings) update(interval int, autoTransfer bool) error {
 	result := Db.Model(&settings).Updates(GroupSettings{Interval: interval, AutoTransfer: autoTransfer})
-	return result.Error
+	if result.Error != nil {
+		return result.Error
+	}
+	// Assume the interval has changed and
+	// update the cron job with new interval.
+	err := master.ChangeTime(int(settings.GroupId), interval)
+	if err != nil {
+		return err
+	}
+	return nil
 }

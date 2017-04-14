@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/chaselengel/lilac/rss"
 	"github.com/chaselengel/lilac/transfer"
-	"github.com/robfig/cron"
+	"github.com/chaselengel/lilac/worker"
 	"io/ioutil"
 	"net/http"
 	"path"
@@ -14,46 +14,43 @@ import (
 	"time"
 )
 
+var master *worker.Master
+
 // Creates cron jobs for all groups.
-func InitChecker(groups []Group) *cron.Cron {
-	c := cron.New()
+func InitChecker(groups []Group) {
+	master = worker.Init()
 	for _, group := range groups {
 		settings, err := group.GroupSettings()
 		if err != nil {
 			fmt.Println("Failed to get group settings:", err)
 			continue
 		}
-		formated := fmt.Sprintf("@every %vm", settings.Interval)
-		var checkgroup []Group
-		checkgroup = append(checkgroup, group)
-		err = c.AddFunc(formated, func() { check(checkgroup) })
+		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(&group) })
 		if err != nil {
 			fmt.Printf("Failed to add cron for %v\n", group.Name)
 		}
 	}
-	c.Start()
-	return c
+	master.Start()
 }
 
-func check(groups []Group) {
-	for _, group := range groups {
-		err := group.updateLastChecked()
-		if err != nil {
-			fmt.Println("Failed to update checked:", err)
-			continue
-		}
-		channel, err := rss.Get(group.Link)
-		if err != nil {
-			fmt.Println("RSS Get error:", err)
-			continue
-		}
-		requests, err := group.allRequests()
-		if err != nil {
-			fmt.Println("allRequests error:", err)
-			continue
-		}
-		group.search(channel.Items, requests)
+func check(group *Group) {
+	fmt.Printf("Checking %v\n", group)
+	err := group.updateLastChecked()
+	if err != nil {
+		fmt.Println("Failed to update checked:", err)
+		return
 	}
+	channel, err := rss.Get(group.Link)
+	if err != nil {
+		fmt.Println("RSS Get error:", err)
+		return
+	}
+	requests, err := group.allRequests()
+	if err != nil {
+		fmt.Println("allRequests error:", err)
+		return
+	}
+	group.search(channel.Items, requests)
 }
 
 // Search RSS items for requests.
@@ -79,8 +76,8 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 					break
 				}
 			}
+			// Item is already in history
 			if inmh {
-				fmt.Println("Item already in history")
 				continue
 			}
 

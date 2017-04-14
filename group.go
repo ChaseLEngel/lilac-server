@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -44,6 +45,8 @@ func (group *Group) insert() error {
 	if result.Error != nil {
 		return result.Error
 	}
+	// Create cron job
+	master.AddSlave(int(group.ID), 30, func() { check(group) })
 	return nil
 }
 
@@ -83,6 +86,15 @@ func deleteGroup(id string) error {
 	}
 	if result.RowsAffected == 0 {
 		return fmt.Errorf("record not found")
+	}
+	// Remove cron job
+	intId, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Errorf("Failed to convert id to int")
+	}
+	err = master.RemoveSlave(intId)
+	if err != nil {
+		return fmt.Errorf("Failed to remove slave")
 	}
 	return nil
 }

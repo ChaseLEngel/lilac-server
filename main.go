@@ -16,8 +16,8 @@ func main() {
 	if err != nil {
 		panic("Failed to init checker with groups.")
 	}
-	cron := InitChecker(groups)
-	defer cron.Stop()
+	InitChecker(groups)
+	defer master.Stop()
 
 	router := NewRouter()
 	methods := []string{"GET", "POST", "DELETE", "PUT"}

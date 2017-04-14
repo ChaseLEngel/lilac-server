@@ -39,12 +39,6 @@ var routes = Routes{
 	Route{
 		"GroupsCheck",
 		"POST",
-		"/groups/check",
-		GroupsCheckAll,
-	},
-	Route{
-		"GroupsCheck",
-		"POST",
 		"/groups/{groupId}/check",
 		GroupsCheck,
 	},
