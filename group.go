@@ -46,7 +46,7 @@ func (group *Group) insert() error {
 		return result.Error
 	}
 	// Create cron job
-	master.AddSlave(int(group.ID), 30, func() { check(group) })
+	master.AddSlave(int(group.ID), 30, func() { check(*group) })
 	return nil
 }
 

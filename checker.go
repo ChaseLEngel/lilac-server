@@ -25,7 +25,7 @@ func InitChecker(groups []Group) {
 			fmt.Println("Failed to get group settings:", err)
 			continue
 		}
-		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(&group) })
+		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(group) })
 		if err != nil {
 			fmt.Printf("Failed to add cron for %v\n", group.Name)
 		}
@@ -33,7 +33,7 @@ func InitChecker(groups []Group) {
 	master.Start()
 }
 
-func check(group *Group) {
+func check(group Group) {
 	fmt.Printf("Checking %v\n", group)
 	err := group.updateLastChecked()
 	if err != nil {

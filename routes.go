@@ -189,7 +189,7 @@ var routes = Routes{
 	Route{
 		"TransferRequest",
 		"POST",
-		"/tranfer/{file}",
+		"/transfer",
 		transferRequest,
 	},
 }
