@@ -21,7 +21,7 @@ func (group Group) insertGroupSettings(settings GroupSettings) error {
 	}
 	// Assume the interval has changed and
 	// update the cron job with new interval.
-	err := master.ChangeTime(int(settings.GroupId), settings.Interval)
+	err := master.ChangeTime(int(group.ID), settings.Interval)
 	if err != nil {
 		return err
 	}

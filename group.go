@@ -35,18 +35,18 @@ func (group Group) allNotifications() ([]Notification, error) {
 }
 
 func (group *Group) insert() error {
-	result := Db.Create(&group)
-	// All groups have settings by default
-	settings := NewGroupSettings(30, false)
-	err := group.insertGroupSettings(settings)
-	if err != nil {
-		return err
-	}
-	if result.Error != nil {
+	if result := Db.Create(&group); result.Error != nil {
 		return result.Error
 	}
 	// Create cron job
-	master.AddSlave(int(group.ID), 30, func() { check(*group) })
+	if err := master.AddSlave(int(group.ID), 30, func() { check(*group) }); err != nil {
+		return err
+	}
+	// All groups have settings by default
+	settings := NewGroupSettings(30, false)
+	if err := group.insertGroupSettings(settings); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -94,7 +94,7 @@ func deleteGroup(id string) error {
 	}
 	err = master.RemoveSlave(intId)
 	if err != nil {
-		return fmt.Errorf("Failed to remove slave")
+		return fmt.Errorf("Failed to remove slave: %v", err)
 	}
 	return nil
 }
