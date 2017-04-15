@@ -25,7 +25,11 @@ func InitChecker(groups []Group) {
 			fmt.Println("Failed to get group settings:", err)
 			continue
 		}
-		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(group) })
+		// Some kind of scoping issue here. If we don't define
+		// a new group variable and pass it into func than all cron jobs
+		// will execute with the same group.
+		localGroup := group
+		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(localGroup) })
 		if err != nil {
 			fmt.Printf("Failed to add cron for %v\n", group.Name)
 		}
@@ -34,7 +38,6 @@ func InitChecker(groups []Group) {
 }
 
 func check(group Group) {
-	fmt.Printf("Checking %v\n", group)
 	err := group.updateLastChecked()
 	if err != nil {
 		fmt.Println("Failed to update checked:", err)
