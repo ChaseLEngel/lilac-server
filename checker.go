@@ -18,6 +18,7 @@ var master *worker.Master
 
 // Creates cron jobs for all groups.
 func InitChecker(groups []Group) {
+	fmt.Println("Initializing checker")
 	master = worker.Init()
 	for _, group := range groups {
 		settings, err := group.GroupSettings()
@@ -29,6 +30,7 @@ func InitChecker(groups []Group) {
 		// a new group variable and pass it into func than all cron jobs
 		// will execute with the same group.
 		localGroup := group
+		fmt.Printf("Adding slave for %v interval: %v\n", localGroup.Name, settings.Interval)
 		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(localGroup) })
 		if err != nil {
 			fmt.Printf("Failed to add cron for %v\n", group.Name)
@@ -38,6 +40,7 @@ func InitChecker(groups []Group) {
 }
 
 func check(group Group) {
+	fmt.Printf("Running check for %v\n", group.Name)
 	err := group.updateLastChecked()
 	if err != nil {
 		fmt.Println("Failed to update checked:", err)
