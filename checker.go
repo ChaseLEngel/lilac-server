@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/chaselengel/lilac/rss"
+	"github.com/chaselengel/lilac/telegram"
 	"github.com/chaselengel/lilac/transfer"
 	"github.com/chaselengel/lilac/worker"
 	"io/ioutil"
@@ -110,12 +111,21 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
-			// If group's settings have auto transfer set
-			// then transfer file to request's machines.
 			settings, err := group.GroupSettings()
 			if err != nil {
 				fmt.Println("Failed to get group's settings:", err)
 			}
+
+			if settings.TelegramApiToken != "" {
+				tele := telegram.New(settings.TelegramApiToken)
+				message := strings.Replace(settings.message, "%%title%%", item.Title, -1)
+				if err := tele.SendMessage(settings.TelegramChatId, message); err != nil {
+					fmt.Println("Failed to send Telegram:", err)
+				}
+			}
+
+			// If group's settings have auto transfer set
+			// then transfer file to request's machines.
 			if settings.AutoTransfer {
 				if err := send(request, path.Join(downloadPath, filename)); err != nil {
 					fmt.Println("Failed to transfer file:", err)

@@ -1,10 +1,13 @@
 package main
 
 type GroupSettings struct {
-	ID           uint `json:"settings_id" gorm:"primary_key"`
-	GroupId      uint `json:"group_id"`
-	Interval     int  `json:"interval"`      // RSS checking interval
-	AutoTransfer bool `json:"auto_transfer"` // Should files be transfered after download
+	ID               uint   `json:"settings_id" gorm:"primary_key"`
+	GroupId          uint   `json:"group_id"`
+	Interval         int    `json:"interval"`      // RSS checking interval
+	AutoTransfer     bool   `json:"auto_transfer"` // Should files be transfered after download
+	TelegramApiToken string `json:"telegram_api_token"`
+	TelegramChatId   string `json:"telegram_chat_id"`
+	TelegramMessage  string `json:"telegram_message"`
 }
 
 func NewGroupSettings(interval int, autoTransfer bool) GroupSettings {
