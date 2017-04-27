@@ -146,6 +146,13 @@ func RequestsHistoryDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res = Response{Status{200, ""}, request}
+	history, err := request.deleteMatchHistory(mux.Vars(r)["historyId"])
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	res = Response{Status{200, ""}, history}
 	json.NewEncoder(w).Encode(res)
 }
