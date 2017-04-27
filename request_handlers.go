@@ -129,3 +129,23 @@ func RequestsHistory(w http.ResponseWriter, r *http.Request) {
 	res = Response{Status{200, ""}, matchHistory}
 	json.NewEncoder(w).Encode(res)
 }
+
+func RequestsHistoryDelete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var res Response
+	group, err := findGroup(mux.Vars(r)["groupId"])
+	if err != nil {
+		res = Response{Status{400, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+	request, err := group.findRequest(mux.Vars(r)["requestId"])
+	if err != nil {
+		res = Response{Status{500, err.Error()}, nil}
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	res = Response{Status{200, ""}, request}
+	json.NewEncoder(w).Encode(res)
+}

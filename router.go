@@ -2,12 +2,11 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 )
 
 func logRequest(method string, uri string, name string) {
-	log.Printf("%s %s %s", method, uri, name)
+	log.Infof("%v %v %v", method, uri, name)
 }
 
 func routeSetup(handler http.Handler, name string) http.Handler {

@@ -39,7 +39,7 @@ func (group *Group) insert() error {
 		return result.Error
 	}
 	// Create cron job
-	if err := master.AddSlave(int(group.ID), 30, func() { check(*group) }); err != nil {
+	if err := master.AddSlave(int(group.ID), 30, func() { check(group.ID) }); err != nil {
 		return err
 	}
 	// All groups have settings by default

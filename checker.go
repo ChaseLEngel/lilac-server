@@ -19,42 +19,47 @@ var master *worker.Master
 
 // Creates cron jobs for all groups.
 func InitChecker(groups []Group) {
-	fmt.Println("Initializing checker")
+	log.Info("Initializing checker")
 	master = worker.Init()
 	for _, group := range groups {
 		settings, err := group.GroupSettings()
 		if err != nil {
-			fmt.Println("Failed to get group settings:", err)
+			log.Error("Failed to get group settings:", err)
 			continue
 		}
 		// Some kind of scoping issue here. If we don't define
 		// a new group variable and pass it into func than all cron jobs
 		// will execute with the same group.
-		localGroup := group
-		fmt.Printf("Adding slave for %v interval: %v\n", localGroup.Name, settings.Interval)
-		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(localGroup) })
+		localGroupId := group.ID
+
+		log.Infof("Adding slave for group %v(%v), interval: %v\n", group.Name, localGroupId, settings.Interval)
+		err = master.AddSlave(int(group.ID), settings.Interval, func() { check(localGroupId) })
 		if err != nil {
-			fmt.Printf("Failed to add cron for %v\n", group.Name)
+			log.Error("Failed to add cron for", group.Name)
 		}
 	}
 	master.Start()
 }
 
-func check(group Group) {
-	fmt.Printf("Running check for %v\n", group.Name)
-	err := group.updateLastChecked()
+func check(groupId uint) {
+	group, err := findGroup(strconv.FormatUint(uint64(groupId), 10))
 	if err != nil {
-		fmt.Println("Failed to update checked:", err)
+		log.Error("Failed to find group for id", groupId)
+	}
+	fmt.Printf("Running check for %v\n", group.Name)
+	err = group.updateLastChecked()
+	if err != nil {
+		log.Error("Failed to update checked:", err)
 		return
 	}
 	channel, err := rss.Get(group.Link)
 	if err != nil {
-		fmt.Println("RSS Get error:", err)
+		log.Error("RSS Get error:", err)
 		return
 	}
 	requests, err := group.allRequests()
 	if err != nil {
-		fmt.Println("allRequests error:", err)
+		log.Error("allRequests error:", err)
 		return
 	}
 	group.search(channel.Items, requests)
@@ -73,7 +78,7 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			inmh := false
 			matchHistory, err := request.history()
 			if err != nil {
-				fmt.Println("History error: ", err)
+				log.Error("History error: ", err)
 				continue
 			}
 			for _, mh := range matchHistory {
@@ -95,32 +100,33 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			} else if group.DownloadPath != "" {
 				downloadPath = group.DownloadPath
 			} else {
-				fmt.Println("No download path")
+				log.Error("No download path")
 				continue
 			}
 
 			filename, err := download(item, downloadPath)
 			if err != nil {
-				fmt.Println("Download error: ", err)
+				log.Error("Download error: ", err)
 				continue
 			}
 
 			mh := MatchHistory{Timestamp: time.Now(), Regex: "", File: item.Title}
 			if err := request.insertMatchHistory(&mh); err != nil {
-				fmt.Println("Match History Insert error: ", err)
+				log.Error("Match History Insert error: ", err)
 				continue
 			}
 
 			settings, err := group.GroupSettings()
 			if err != nil {
-				fmt.Println("Failed to get group's settings:", err)
+				log.Error("Failed to get group's settings:", err)
+				continue
 			}
 
 			if settings.TelegramApiToken != "" {
 				tele := telegram.New(settings.TelegramApiToken)
-				message := strings.Replace(settings.message, "%%title%%", item.Title, -1)
+				message := strings.Replace(settings.TelegramMessage, "%title%", item.Title, -1)
 				if err := tele.SendMessage(settings.TelegramChatId, message); err != nil {
-					fmt.Println("Failed to send Telegram:", err)
+					log.Error("Failed to send Telegram:", err)
 				}
 			}
 
@@ -128,7 +134,7 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			// then transfer file to request's machines.
 			if settings.AutoTransfer {
 				if err := send(request, path.Join(downloadPath, filename)); err != nil {
-					fmt.Println("Failed to transfer file:", err)
+					log.Error("Failed to transfer file:", err)
 					continue
 				}
 			}
@@ -140,14 +146,17 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 func send(request Request, source string) error {
 	requestMachines, err := request.AllRequestMachines()
 	if err != nil {
+		log.Errorf("Failed to get %v match history: %v\n", request.Name, err)
 		return err
 	}
 	for _, rm := range requestMachines {
 		machine, err := findMachine(strconv.FormatUint(uint64(rm.MachineID), 10))
 		if err != nil {
+			log.Errorf("Failed to find machine for request %v: %v\n", request.Name, err)
 			return err
 		}
 		if err := transfer.Transfer(source, rm.Destination, machine.Host, machine.Port, machine.User); err != nil {
+			log.Errorf("Transfer failed for %v to %v: %v\n", request.Name, machine.Host, err)
 			return err
 		}
 	}

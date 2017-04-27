@@ -145,6 +145,12 @@ var routes = Routes{
 		RequestsHistory,
 	},
 	Route{
+		"RequestsHistoryDelete",
+		"DELETE",
+		"/groups/{groupId}/requests/{requestId}/history/{historyId}",
+		RequestsHistoryDelete,
+	},
+	Route{
 		"Machines",
 		"GET",
 		"/machines",

@@ -1,12 +1,16 @@
 package main
 
 import (
+	"github.com/chaselengel/lilac/logger"
 	"github.com/gorilla/handlers"
-	"log"
 	"net/http"
 )
 
+var log *logger.Logger
+
 func main() {
+	log = logger.New("./lilac.log")
+
 	err := initDatabase("production.db")
 	if err != nil {
 		panic("Failed to init database")
@@ -21,5 +25,5 @@ func main() {
 
 	router := NewRouter()
 	methods := []string{"GET", "POST", "DELETE", "PUT"}
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedMethods(methods))(router)))
+	http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedMethods(methods))(router))
 }

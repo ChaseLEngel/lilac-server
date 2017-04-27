@@ -52,7 +52,7 @@ func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	check(group)
+	check(group.ID)
 	res = NewResponse(200, nil, nil)
 	json.NewEncoder(w).Encode(res)
 }
