@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/chaselengel/lilac/rss"
 	"github.com/chaselengel/lilac/telegram"
 	"github.com/chaselengel/lilac/transfer"
@@ -46,7 +45,7 @@ func check(groupId uint) {
 	if err != nil {
 		log.Error("Failed to find group for id", groupId)
 	}
-	fmt.Printf("Running check for %v\n", group.Name)
+	log.Infof("Running check for %v\n", group.Name)
 	err = group.updateLastChecked()
 	if err != nil {
 		log.Error("Failed to update checked:", err)

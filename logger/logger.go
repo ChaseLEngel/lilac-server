@@ -32,11 +32,11 @@ func (l *Logger) write(text string) {
 func format(level string, text string) string {
 	t := time.Now()
 	formattedTime := t.Format("Mon Jan _2 15:04:05 2006")
-	return fmt.Sprintf("[%v] [%v] %v\n", level, formattedTime, text)
+	return fmt.Sprintf("[%v] [%v] %v", level, formattedTime, text)
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.write(format("ERRO", fmt.Sprint(v...)))
+	l.write(format("INFO", fmt.Sprintf("%v\n", v...)))
 }
 
 func (l *Logger) Infof(s string, v ...interface{}) {
@@ -44,7 +44,7 @@ func (l *Logger) Infof(s string, v ...interface{}) {
 }
 
 func (l *Logger) Warn(v ...interface{}) {
-	l.write(format("ERRO", fmt.Sprint(v...)))
+	l.write(format("WARN", fmt.Sprintf("%v\n", v...)))
 }
 
 func (l *Logger) Warnf(s string, v ...interface{}) {
@@ -52,7 +52,7 @@ func (l *Logger) Warnf(s string, v ...interface{}) {
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.write(format("ERRO", fmt.Sprint(v...)))
+	l.write(format("ERRO", fmt.Sprintf("%v\n", v...)))
 }
 
 func (l *Logger) Errorf(s string, v ...interface{}) {
