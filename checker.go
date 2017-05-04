@@ -109,6 +109,8 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
+			log.Infof("Downloaded %v to %v\n", item.Title, downloadPath)
+
 			mh := MatchHistory{Timestamp: time.Now(), Regex: "", File: item.Title}
 			if err := request.insertMatchHistory(&mh); err != nil {
 				log.Error("Match History Insert error: ", err)
@@ -158,6 +160,7 @@ func send(request Request, source string) error {
 			log.Errorf("Transfer failed for %v to %v: %v\n", request.Name, machine.Host, err)
 			return err
 		}
+		log.Infof("Transfered %v to %v on machine %v", source, rm.Destination, machine.Host)
 	}
 	return nil
 }

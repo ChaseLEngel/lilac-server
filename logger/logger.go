@@ -13,7 +13,7 @@ type Logger struct {
 func New(logfile string) *Logger {
 	logger := new(Logger)
 	logger.logfile = logfile
-	logger.write(format("INFO", "Logger started"))
+	logger.Info("Logger started logging to ", logfile)
 	return logger
 }
 
@@ -36,7 +36,7 @@ func format(level string, text string) string {
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.write(format("INFO", fmt.Sprintf("%v\n", v...)))
+	l.write(format("INFO", fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Infof(s string, v ...interface{}) {
@@ -44,7 +44,7 @@ func (l *Logger) Infof(s string, v ...interface{}) {
 }
 
 func (l *Logger) Warn(v ...interface{}) {
-	l.write(format("WARN", fmt.Sprintf("%v\n", v...)))
+	l.write(format("WARN", fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Warnf(s string, v ...interface{}) {
@@ -52,7 +52,7 @@ func (l *Logger) Warnf(s string, v ...interface{}) {
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.write(format("ERRO", fmt.Sprintf("%v\n", v...)))
+	l.write(format("ERRO", fmt.Sprintln(v...)))
 }
 
 func (l *Logger) Errorf(s string, v ...interface{}) {
