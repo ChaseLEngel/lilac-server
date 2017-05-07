@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -11,11 +12,11 @@ func Machines(w http.ResponseWriter, r *http.Request) {
 	var res Response
 	machines, err := allMachines()
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, machines}
+	res = NewResponse(200, nil, machines)
 	json.NewEncoder(w).Encode(res)
 	return
 }
@@ -24,7 +25,7 @@ func MachinesCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 	if r.Body == nil {
-		res = Response{Status{400, "No body"}, nil}
+		res = NewResponse(400, errors.New("No body"), nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -33,11 +34,11 @@ func MachinesCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&machine)
 	err := machine.insert()
 	if err != nil {
-		res = Response{Status{500, err.Error()}, nil}
+		res = NewResponse(500, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, machine}
+	res = NewResponse(200, nil, machine)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -48,26 +49,26 @@ func MachinesUpdate(w http.ResponseWriter, r *http.Request) {
 	var newMachine Machine
 	err := json.NewDecoder(r.Body).Decode(&newMachine)
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	machine, err := findMachine(mux.Vars(r)["machineId"])
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	err = machine.update(newMachine)
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, machine}
+	res = NewResponse(200, nil, machine)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -77,13 +78,13 @@ func MachinesDelete(w http.ResponseWriter, r *http.Request) {
 
 	machine, err := findMachine(mux.Vars(r)["machineId"])
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	machine.delete()
 
-	res = Response{Status{200, ""}, machine}
+	res = NewResponse(200, nil, machine)
 	json.NewEncoder(w).Encode(res)
 }

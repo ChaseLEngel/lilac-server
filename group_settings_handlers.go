@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -11,17 +12,17 @@ func Settings(w http.ResponseWriter, r *http.Request) {
 	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 	settings, err := group.GroupSettings()
 	if err != nil {
-		res = Response{Status{500, err.Error()}, nil}
+		res = NewResponse(500, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, settings}
+	res = NewResponse(200, nil, settings)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -30,13 +31,13 @@ func SettingsCreate(w http.ResponseWriter, r *http.Request) {
 	var res Response
 	group, err := findGroup(mux.Vars(r)["groupId"])
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	if r.Body == nil {
-		res = Response{Status{400, "No Body"}, nil}
+		res = NewResponse(400, errors.New("No body"), nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -46,10 +47,10 @@ func SettingsCreate(w http.ResponseWriter, r *http.Request) {
 
 	err = group.insertGroupSettings(settings)
 	if err != nil {
-		res = Response{Status{500, err.Error()}, nil}
+		res = NewResponse(500, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, settings}
+	res = NewResponse(200, nil, settings)
 	json.NewEncoder(w).Encode(res)
 }
