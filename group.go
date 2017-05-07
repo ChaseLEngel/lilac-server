@@ -14,7 +14,6 @@ type Group struct {
 	Link          string         `json:"link"`
 	Settings      GroupSettings  `json:"-"`
 	Requests      []Request      `json:"-"`
-	Constraints   []Constraint   `json:"-"`
 	Notifications []Notification `json:"-"`
 }
 

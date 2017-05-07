@@ -160,7 +160,7 @@ func send(request Request, source string) error {
 			log.Errorf("Transfer failed for %v to %v: %v\n", request.Name, machine.Host, err)
 			return err
 		}
-		log.Infof("Transfered %v to %v on machine %v", source, rm.Destination, machine.Host)
+		log.Infof("Transfered %v to %v:%v\n", source, machine.Host, rm.Destination)
 	}
 	return nil
 }

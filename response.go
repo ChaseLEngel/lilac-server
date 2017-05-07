@@ -14,6 +14,7 @@ func NewResponse(code int, err error, data interface{}) Response {
 	var status Status
 	if err != nil {
 		status = Status{code, err.Error()}
+		log.Error(err.Error())
 	} else {
 		status = Status{code, ""}
 	}

@@ -16,7 +16,6 @@ func initDatabase(file string) error {
 
 	// Update or create tables
 	Db.AutoMigrate(
-		&Constraint{},
 		&Group{},
 		&Machine{},
 		&Notification{},

@@ -89,25 +89,6 @@ func GroupsShow(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GroupConstraints(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var res Response
-	group, err := findGroup(mux.Vars(r)["groupId"])
-	if err != nil {
-		res = NewResponse(400, err, nil)
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	constraints, err := group.allConstraints()
-	if err != nil {
-		res = NewResponse(500, err, nil)
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	res = NewResponse(200, nil, constraints)
-	json.NewEncoder(w).Encode(res)
-}
-
 func GroupsDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
@@ -123,7 +104,7 @@ func GroupsDelete(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(res)
 		return
 	}
-	res = Response{Status{200, ""}, group}
+	res = NewResponse(200, nil, group)
 	json.NewEncoder(w).Encode(res)
 }
 

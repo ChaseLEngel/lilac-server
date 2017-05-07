@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -13,19 +14,19 @@ func RequestMachines(w http.ResponseWriter, r *http.Request) {
 	var request Request
 	result := Db.Find(&request, "ID = "+mux.Vars(r)["requestID"])
 	if result.Error != nil {
-		res = Response{Status{400, result.Error.Error()}, nil}
+		res = NewResponse(400, result.Error, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	requestMachines, err := request.AllRequestMachines()
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, requestMachines}
+	res = NewResponse(200, nil, requestMachines)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -38,8 +39,10 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 
+	log.Info(r.Body)
+
 	if r.Body == nil {
-		res = Response{Status{400, "No body"}, nil}
+		res = NewResponse(400, errors.New("No Body"), nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -47,7 +50,7 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 	var request Request
 	result := Db.Find(&request, "ID = "+mux.Vars(r)["requestID"])
 	if result.Error != nil {
-		res = Response{Status{400, result.Error.Error()}, nil}
+		res = NewResponse(400, result.Error, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -57,7 +60,7 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 	var machineDestinations []MachineDestination
 	err := json.NewDecoder(r.Body).Decode(&machineDestinations)
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		res = NewResponse(400, err, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
@@ -65,7 +68,7 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 	for _, md := range machineDestinations {
 		machine, err := findMachine(md.MachineID)
 		if err != nil {
-			res = Response{Status{400, err.Error()}, nil}
+			res = NewResponse(400, err, nil)
 			json.NewEncoder(w).Encode(res)
 			return
 		}
@@ -78,14 +81,11 @@ func RequestMachinesCreate(w http.ResponseWriter, r *http.Request) {
 	var requestMachines []RequestMachine
 	result = Db.Model(&request).Related(&requestMachines)
 	if result.Error != nil {
-		res = Response{Status{400, result.Error.Error()}, nil}
+		res = NewResponse(400, result.Error, nil)
 		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	res = Response{Status{200, ""}, requestMachines}
+	res = NewResponse(200, nil, requestMachines)
 	json.NewEncoder(w).Encode(res)
-}
-
-func RequestMachinesHistory(w http.ResponseWriter, r *http.Request) {
 }

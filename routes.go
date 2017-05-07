@@ -85,36 +85,6 @@ var routes = Routes{
 		SettingsCreate,
 	},
 	Route{
-		"Constraints",
-		"GET",
-		"/groups/{groupId}/constraints",
-		Constraints,
-	},
-	Route{
-		"ConstraintsCreate",
-		"POST",
-		"/groups/{groupId}/constraints",
-		ConstraintsCreate,
-	},
-	Route{
-		"ConstraintsShow",
-		"GET",
-		"/groups/{groupId}/constraints/{constraintId}",
-		ConstraintsShow,
-	},
-	Route{
-		"ConstraintsDelete",
-		"DELETE",
-		"/groups/{groupId}/constraints/{constraintId}",
-		ConstraintsDelete,
-	},
-	Route{
-		"ConstraintsUpdate",
-		"PUT",
-		"/groups/{groupId}/constraints/{constraintId}",
-		ConstraintsUpdate,
-	},
-	Route{
 		"Requests",
 		"GET",
 		"/groups/{groupId}/requests",
@@ -185,12 +155,6 @@ var routes = Routes{
 		"POST",
 		"/requests/{requestID}/machines",
 		RequestMachinesCreate,
-	},
-	Route{
-		"RequestMachineHistory",
-		"GET",
-		"/requests/{requestID}/machines/{machineID}/history",
-		RequestMachinesHistory,
 	},
 	Route{
 		"TransferRequest",
