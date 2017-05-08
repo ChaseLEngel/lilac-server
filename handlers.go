@@ -8,8 +8,14 @@ import (
 	"regexp"
 )
 
+type Auth struct {
+	Token string `json:"token"`
+}
+
 func login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	res := NewResponse(200, nil, Auth{Token: jwtData.TokenString})
+	json.NewEncoder(w).Encode(res)
 }
 
 type File struct {
