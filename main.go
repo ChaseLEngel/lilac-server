@@ -31,6 +31,14 @@ func main() {
 	}
 
 	router := NewRouter()
-	methods := []string{"GET", "POST", "DELETE", "PUT"}
-	http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedMethods(methods))(router))
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "DELETE", "PUT"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+	headers := handlers.AllowedHeaders([]string{"Authorization"})
+	credentials := handlers.AllowCredentials()
+	validators := handlers.AllowedOriginValidator(
+		func(origin string) bool {
+			return true
+		},
+	)
+	http.ListenAndServe(":8080", handlers.CORS(methods, origins, headers, validators, credentials)(router))
 }

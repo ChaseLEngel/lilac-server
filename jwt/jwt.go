@@ -2,8 +2,11 @@ package jwt
 
 import (
 	"crypto/rsa"
+	"fmt"
 	jwtgo "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type JwtData struct {
@@ -38,4 +41,35 @@ func Init() (*JwtData, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func (data *JwtData) Authenticate(r *http.Request) bool {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return false
+	}
+
+	authorization := strings.Split(authHeader, " ")
+
+	if len(authorization) != 2 {
+		return false
+	}
+
+	token, err := jwtgo.Parse(authorization[1], func(token *jwtgo.Token) (interface{}, error) {
+		if token.Method.Alg() != "RS256" {
+			return nil, fmt.Errorf("Incorrent JWT signing method: %v\n", token.Method.Alg())
+		}
+		return data.publicKey, nil
+	})
+
+	if err != nil {
+		//fmt.Printf("Failed to parse JWT token from request: %v\n", err)
+		return false
+	}
+
+	if token.Valid {
+		return true
+	}
+
+	return false
 }
