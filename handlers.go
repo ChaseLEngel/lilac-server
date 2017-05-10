@@ -30,8 +30,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("LILAC_USER") == user.User &&
 		os.Getenv("LILAC_PASSWORD") == user.Password {
 		res = NewResponse(200, nil, Auth{Token: jwtData.TokenString})
+		log.Infof("Successful login for user: \"%v\"\n", user.User)
 	} else {
-		res = NewResponse(401, fmt.Errorf("Bad credentials"), nil)
+		res = NewResponse(401, fmt.Errorf("Bad credentials for user: \"%v\"", user.User), nil)
 	}
 	json.NewEncoder(w).Encode(res)
 }
