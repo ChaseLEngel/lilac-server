@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/chaselengel/lilac/config"
 	"github.com/chaselengel/lilac/jwt"
 	"github.com/chaselengel/lilac/logger"
 	"github.com/gorilla/handlers"
@@ -10,11 +11,17 @@ import (
 
 var log *logger.Logger
 var jwtData *jwt.JwtData
+var conf config.Config
 
 func main() {
-	log = logger.New("./lilac.log")
+	var err error
+	conf, err = config.Parse("./config.json")
+	if err != nil {
+		panic(fmt.Sprintf("Failed to parse config: %v", err))
+	}
+	log = logger.New(conf.LogFile)
 
-	if initDatabase("production.db") != nil {
+	if initDatabase(conf.Database) != nil {
 		panic("Failed to init database")
 	}
 
@@ -25,7 +32,7 @@ func main() {
 	InitChecker(groups)
 	defer master.Stop()
 
-	jwtData, err = jwt.Init()
+	jwtData, err = jwt.Init(conf.PrivateKey, conf.PublicKey)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to init jw: %v", err))
 	}
@@ -40,5 +47,5 @@ func main() {
 			return true
 		},
 	)
-	http.ListenAndServe(":8080", handlers.CORS(methods, origins, headers, validators, credentials)(router))
+	panic(http.ListenAndServe(conf.Port, handlers.CORS(methods, origins, headers, validators, credentials)(router)))
 }

@@ -16,10 +16,10 @@ type JwtData struct {
 	TokenString string
 }
 
-func Init() (*JwtData, error) {
+func Init(privateKeyFile, publicKeyFile string) (*JwtData, error) {
 	data := new(JwtData)
 	var err error
-	privateKeyBytes, err := ioutil.ReadFile("lilac.rsa")
+	privateKeyBytes, err := ioutil.ReadFile(privateKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func Init() (*JwtData, error) {
 	if err != nil {
 		return nil, err
 	}
-	publicKeyBytes, err := ioutil.ReadFile("lilac.rsa.pub")
+	publicKeyBytes, err := ioutil.ReadFile(publicKeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +43,16 @@ func Init() (*JwtData, error) {
 	return data, nil
 }
 
-func (data *JwtData) Authenticate(r *http.Request) bool {
+func (data *JwtData) Authenticate(r *http.Request) (bool, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return false
+		return false, nil
 	}
 
 	authorization := strings.Split(authHeader, " ")
 
 	if len(authorization) != 2 {
-		return false
+		return false, nil
 	}
 
 	token, err := jwtgo.Parse(authorization[1], func(token *jwtgo.Token) (interface{}, error) {
@@ -63,13 +63,12 @@ func (data *JwtData) Authenticate(r *http.Request) bool {
 	})
 
 	if err != nil {
-		//fmt.Printf("Failed to parse JWT token from request: %v\n", err)
-		return false
+		return false, fmt.Errorf("Failed to parse token: %v", err)
 	}
 
 	if token.Valid {
-		return true
+		return true, nil
 	}
 
-	return false
+	return false, nil
 }
