@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/chaselengel/lilac/config"
 	"github.com/chaselengel/lilac/jwt"
@@ -15,7 +16,12 @@ var conf config.Config
 
 func main() {
 	var err error
-	conf, err = config.Parse("./config.json")
+
+	var configPath string
+	flag.StringVar(&configPath, "config", "./config", "Server JSON config path")
+	flag.Parse()
+
+	conf, err = config.Parse(configPath)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to parse config: %v", err))
 	}

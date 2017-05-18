@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 var (
@@ -56,7 +57,11 @@ func (c *Config) validate() error {
 
 func Parse(configPath string) (Config, error) {
 	config := Config{}
-	data, err := ioutil.ReadFile(configPath)
+	absPath, err := filepath.Abs(configPath)
+	if err != nil {
+		return config, err
+	}
+	data, err := ioutil.ReadFile(absPath)
 	if err != nil {
 		return config, err
 	}
