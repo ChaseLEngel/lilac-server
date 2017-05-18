@@ -18,7 +18,7 @@ func main() {
 	var err error
 
 	var configPath string
-	flag.StringVar(&configPath, "config", "./config", "Server JSON config path")
+	flag.StringVar(&configPath, "config", "./config.json", "Server JSON config path")
 	flag.Parse()
 
 	conf, err = config.Parse(configPath)

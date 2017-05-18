@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 	"regexp"
 )
@@ -27,8 +26,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	var user User
 	json.NewDecoder(r.Body).Decode(&user)
-	if os.Getenv("LILAC_USER") == user.User &&
-		os.Getenv("LILAC_PASSWORD") == user.Password {
+	if conf.User == user.User && conf.Password == user.Password {
 		res = NewResponse(200, nil, Auth{Token: jwtData.TokenString})
 		log.Infof("Successful login for user: \"%v\"\n", user.User)
 	} else {
