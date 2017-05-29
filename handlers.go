@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 type Auth struct {
@@ -60,11 +61,15 @@ func transferRequest(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		for _, request := range requests {
-			log.Infof("Comparing %v with %v", filepath.Base(file.File), request.Regex)
-			if matched, err := regexp.MatchString(request.Regex, filepath.Base(file.File)); !matched || err != nil {
+			filename := strings.Replace(filepath.Base(file.File), ".", " ", -1)
+			log.Infof("Comparing %v with %v\n", filename, request.Regex)
+			if matched, err := regexp.MatchString(request.Regex, filename); !matched || err != nil {
+				if err != nil {
+					log.Errorf("Failed to match string with %v and %v\n", request.Regex, filename)
+				}
 				continue
 			}
-			log.Infof("Sending %v for %v", file.File, request.Name)
+			log.Infof("Match found %v to %v\n", file.File, request.Name)
 			err := send(request, file.File)
 			if err != nil {
 				log.Errorf("Failed to send %v err: %v\n", file.File, err)
