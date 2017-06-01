@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -128,10 +129,40 @@ func sendDirectory(src, dest string, client *sftp.Client) error {
 	return nil
 }
 
+// Parse $HOME/.ssh/known_hosts and find connecting host's key.
+func parseHostKey(host string) (ssh.PublicKey, error) {
+	var hostKey ssh.PublicKey
+	curUser, err := user.Current()
+	if err != nil {
+		return hostKey, fmt.Errorf("Failed to get current user: %v", err)
+	}
+	knownHostsFile, err := os.Open(curUser.HomeDir + "/.ssh/known_hosts")
+	if err != nil {
+		return hostKey, fmt.Errorf("Failed to open /.ssh/known_hosts: %v", err)
+	}
+	scanner := bufio.NewScanner(knownHostsFile)
+	for scanner.Scan() {
+		parts := strings.Split(scanner.Text(), " ")
+		if strings.Contains(parts[0], host) {
+			hostKey, _, _, _, err := ssh.ParseAuthorizedKey(scanner.Bytes())
+			if err != nil {
+				return hostKey, fmt.Errorf("Failed to parse host key for %v", host)
+			}
+			return hostKey, nil
+		}
+	}
+	return hostKey, fmt.Errorf("No host key found for %v", host)
+}
+
 // Init authentication and transfer source file or directory to destination on remote server.
 // Assumes SSH keys have been setup.
 func Transfer(src, dest, host, port, user string) error {
 	pubKey, err := publicKey()
+	if err != nil {
+		return err
+	}
+
+	hostKey, err := parseHostKey(host)
 	if err != nil {
 		return err
 	}
@@ -141,6 +172,7 @@ func Transfer(src, dest, host, port, user string) error {
 		Auth: []ssh.AuthMethod{
 			*pubKey,
 		},
+		HostKeyCallback: ssh.FixedHostKey(hostKey),
 	}
 
 	client, err := newSFTP(host, port, config)
