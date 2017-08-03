@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/chaselengel/lilac/rss"
 	"github.com/chaselengel/lilac/telegram"
-	"github.com/chaselengel/lilac/transfer"
 	"github.com/chaselengel/lilac/worker"
 	"io/ioutil"
 	"net/http"
@@ -45,22 +44,26 @@ func check(groupId uint) {
 	if err != nil {
 		log.Error("Failed to find group for id", groupId)
 	}
+
 	log.Infof("Running check for %v\n", group.Name)
 	err = group.updateLastChecked()
 	if err != nil {
 		log.Error("Failed to update checked:", err)
 		return
 	}
+
 	channel, err := rss.Get(group.Link)
 	if err != nil {
 		log.Error("RSS Get error:", err)
 		return
 	}
+
 	requests, err := group.allRequests()
 	if err != nil {
 		log.Error("allRequests error:", err)
 		return
 	}
+
 	group.search(channel.Items, requests)
 }
 
@@ -103,8 +106,7 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 				continue
 			}
 
-			filename, err := download(item, downloadPath)
-			if err != nil {
+			if _, err := download(item, downloadPath); err != nil {
 				log.Error("Download error: ", err)
 				continue
 			}
@@ -130,39 +132,8 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 					log.Error("Failed to send Telegram:", err)
 				}
 			}
-
-			// If group's settings have auto transfer set
-			// then transfer file to request's machines.
-			if settings.AutoTransfer {
-				if err := send(request, path.Join(downloadPath, filename)); err != nil {
-					log.Error("Failed to transfer file:", err)
-					continue
-				}
-			}
 		}
 	}
-}
-
-// Look up request's requestMachine and start transfer of source file to machines.
-func send(request Request, source string) error {
-	requestMachines, err := request.AllRequestMachines()
-	if err != nil {
-		log.Errorf("Failed to get %v match history: %v\n", request.Name, err)
-		return err
-	}
-	for _, rm := range requestMachines {
-		machine, err := findMachine(strconv.FormatUint(uint64(rm.MachineID), 10))
-		if err != nil {
-			log.Errorf("Failed to find machine for request %v: %v\n", request.Name, err)
-			return err
-		}
-		if err := transfer.Transfer(source, rm.Destination, machine.Host, machine.Port, machine.User); err != nil {
-			log.Errorf("Transfer failed for %v to %v: %v\n", request.Name, machine.Host, err)
-			return err
-		}
-		log.Infof("Transfered %v to %v:%v\n", source, machine.Host, rm.Destination)
-	}
-	return nil
 }
 
 // Download RSS link to Group's Destination.
