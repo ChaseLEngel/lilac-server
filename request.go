@@ -20,8 +20,9 @@ type MatchHistory struct {
 	ID        uint      `gorm:"index" gorm:"AUTO_INCREMENT" json:"match_history_id"`
 	RequestID uint      `json:"request_id"`
 	Timestamp time.Time `json:"timestamp"`
-	Regex     string    `json:"regex"`
-	File      string    `json:"file"`
+	Name      string    `json:"name"`  // Name of torrent file
+	Files     string    `json:"files"` // Comma seperated list of files torrent contains
+	Size      int       `json:"size"`  // Total size of torrent files in bytes
 }
 
 func (request Request) AllRequestMachines() ([]RequestMachine, error) {

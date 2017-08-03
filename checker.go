@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/chaselengel/lilac/rss"
 	"github.com/chaselengel/lilac/telegram"
+	"github.com/chaselengel/lilac/torrent"
 	"github.com/chaselengel/lilac/worker"
 	"io/ioutil"
 	"net/http"
@@ -78,43 +79,69 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 
 			// Check that we haven't downloaded this item before.
 			inmh := false
+
+			// Get all match history for specific request.
 			matchHistory, err := request.history()
 			if err != nil {
 				log.Error("History error: ", err)
 				continue
 			}
+
+			// Compare match history with RSS item title using regex.
 			for _, mh := range matchHistory {
 				re := regexp.MustCompile(request.Regex)
-				if re.FindString(item.Title) == re.FindString(mh.File) {
+				if re.FindString(item.Title) == re.FindString(mh.Name) {
 					inmh = true
 					break
 				}
 			}
+
 			// Item is already in history
 			if inmh {
 				continue
 			}
 
-			// Request's download path takes priority over Group's
-			var downloadPath string
-			if request.DownloadPath != "" {
-				downloadPath = request.DownloadPath
-			} else if group.DownloadPath != "" {
-				downloadPath = group.DownloadPath
+			// Download RSS item to group download path
+			filepath, err := download(item, group.DownloadPath)
+			if err != nil {
+				log.Errorf("Download error: ", err)
+				continue
+			}
+
+			log.Infof("Downloaded %v to %v\n", item.Title, filepath)
+
+			// Get torrent file information
+			tor, err := torrent.Parse(filepath)
+			if err != nil {
+				log.Errorf("Failed to parse torrent %v: %v", filepath, err)
+			}
+
+			var match MatchHistory
+
+			match.Name = tor.Info.Name
+			match.Timestamp = time.Now()
+
+			// Add torrent files to match history torrent files.
+			// Keep track of file sizes for later
+			var size int
+			for _, file := range tor.Info.Files {
+				size += file.Length
+				for _, path := range file.Path {
+					if len(match.Files) > 0 {
+						path = "," + path
+					}
+					match.Files += path
+				}
+			}
+
+			// Should only be true if only one file is in torrent.
+			if tor.Info.Length > 0 {
+				match.Size = tor.Info.Length
 			} else {
-				log.Error("No download path")
-				continue
+				match.Size = size
 			}
 
-			if _, err := download(item, downloadPath); err != nil {
-				log.Error("Download error: ", err)
-				continue
-			}
-
-			log.Infof("Downloaded %v to %v\n", item.Title, downloadPath)
-
-			mh := MatchHistory{Timestamp: time.Now(), Regex: "", File: item.Title}
-			if err := request.insertMatchHistory(&mh); err != nil {
+			if err := request.insertMatchHistory(&match); err != nil {
 				log.Error("Match History Insert error: ", err)
 				continue
 			}
@@ -137,26 +164,34 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 }
 
 // Download RSS link to Group's Destination.
+// Return path to file that was downloaded.
 func download(item *rss.Item, destination string) (string, error) {
 	resp, err := http.Get(item.Link)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
+
 	filename := extractFilename(resp.Header)
+
 	// No filename was found so just use item's Title.
 	if filename == "" {
 		filename = item.Title
 	}
-	ioutil.WriteFile(path.Join(destination, filename), body, 0644)
-	return filename, nil
+
+	pathToFile := path.Join(destination, filename)
+
+	ioutil.WriteFile(pathToFile, body, 0644)
+
+	return pathToFile, nil
 }
 
-// Get filename from header
+// Attempt to get filename from header
 func extractFilename(header http.Header) string {
 	content := header.Get("Content-Disposition")
 	if content == "" {
