@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/chaselengel/lilac/transfer"
 	"net/http"
-	"path/filepath"
-	"regexp"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -39,13 +39,34 @@ func transferRequest(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, request := range requests {
-			// Attempt to compare filename to regex. This is not the best method for finding matches.
-			filename := strings.Replace(filepath.Base(file.File), ".", " ", -1)
+			history, err := request.history()
+			if err != nil {
+				log.Errorf("Failed to get match history for %v: %v", request.Name, err)
+				continue
+			}
 
-			if matched, err := regexp.MatchString(request.Regex, filename); !matched || err != nil {
-				if err != nil {
-					log.Errorf("Failed to match string with %v and %v\n", request.Regex, filename)
+			// Compare file to request's match history torrent files.
+			basename := path.Base(file.File)
+			fmt.Println(basename)
+			var matched = false
+			for i := 0; !matched && i < len(history); i++ {
+
+				// Compare with torrent filename
+				if basename == history[i].Name {
+					matched = true
+					break
 				}
+
+				// Search torrent files
+				for _, f := range strings.Split(history[i].Files, ",") {
+					if f == basename {
+						matched = true
+					}
+				}
+			}
+
+			// No match found, continue to next request.
+			if !matched {
 				continue
 			}
 

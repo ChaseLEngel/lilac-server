@@ -90,7 +90,7 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 			// Compare match history with RSS item title using regex.
 			for _, mh := range matchHistory {
 				re := regexp.MustCompile(request.Regex)
-				if re.FindString(item.Title) == re.FindString(mh.Name) {
+				if re.FindString(item.Title) == re.FindString(mh.Title) {
 					inmh = true
 					break
 				}
@@ -118,10 +118,11 @@ func (group Group) search(items []*rss.Item, requests []Request) {
 
 			var match MatchHistory
 
+			match.Title = item.Title
 			match.Name = tor.Info.Name
 			match.Timestamp = time.Now()
 
-			// Add torrent files to match history torrent files.
+			// Generate comma seperated list of torrent files.
 			// Keep track of file sizes for later
 			var size int
 			for _, file := range tor.Info.Files {
