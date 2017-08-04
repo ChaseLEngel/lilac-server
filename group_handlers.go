@@ -57,26 +57,6 @@ func GroupsCheck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func GroupsNotifications(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var res Response
-	group, err := findGroup(mux.Vars(r)["groupId"])
-	if err != nil {
-		res = NewResponse(400, err, nil)
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	notifications, err := group.allNotifications()
-	if err != nil {
-		res = NewResponse(500, err, nil)
-		json.NewEncoder(w).Encode(res)
-		return
-	}
-	res = NewResponse(200, nil, notifications)
-	json.NewEncoder(w).Encode(res)
-
-}
-
 func GroupsShow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response

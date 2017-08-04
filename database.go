@@ -18,7 +18,6 @@ func initDatabase(file string) error {
 	Db.AutoMigrate(
 		&Group{},
 		&Machine{},
-		&Notification{},
 		&Request{},
 		&MatchHistory{},
 		&GroupSettings{},

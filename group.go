@@ -7,30 +7,13 @@ import (
 )
 
 type Group struct {
-	ID            uint           `json:"group_id"`
-	Name          string         `json:"name"`
-	DownloadPath  string         `json:"download_path"`
-	LastChecked   time.Time      `json:"last_checked"`
-	Link          string         `json:"link"`
-	Settings      GroupSettings  `json:"-"`
-	Requests      []Request      `json:"-"`
-	Notifications []Notification `json:"-"`
-}
-
-type Notification struct {
-	ID        uint      `json:"notification_id" gorm:"primary_key"`
-	GroupID   uint      `json:"-"`
-	Timestamp time.Time `json:"timestamp"`
-	Message   string    `json:"message"`
-}
-
-func (group Group) allNotifications() ([]Notification, error) {
-	var notifications []Notification
-	result := Db.Model(&group).Related(&notifications)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return notifications, nil
+	ID           uint          `json:"group_id"`
+	Name         string        `json:"name"`
+	DownloadPath string        `json:"download_path"`
+	LastChecked  time.Time     `json:"last_checked"`
+	Link         string        `json:"link"`
+	Settings     GroupSettings `json:"-"`
+	Requests     []Request     `json:"-"`
 }
 
 func (group *Group) insert() error {
