@@ -15,15 +15,18 @@ func routeSetup(handler http.Handler, name string) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			logRequest(r.Method, r.RequestURI, name)
+
 			passed, err := jwtData.Authenticate(r)
 			if err != nil {
 				log.Error(err)
 			}
+
 			if name != "Login" && !passed {
 				res := NewResponse(401, fmt.Errorf("Bad credentials"), nil)
 				json.NewEncoder(w).Encode(res)
 				return
 			}
+
 			handler.ServeHTTP(w, r)
 		},
 	)

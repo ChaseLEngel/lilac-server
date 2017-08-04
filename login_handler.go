@@ -26,9 +26,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&user)
 	if conf.User == user.User && conf.Password == user.Password {
 		res = NewResponse(200, nil, Auth{Token: jwtData.TokenString})
-		log.Infof("Successful login for user: \"%v\"\n", user.User)
+		log.Infof("Successful login from %v for user: \"%v\"\n", r.RemoteAddr, user.User)
 	} else {
-		res = NewResponse(401, fmt.Errorf("Bad credentials for user: \"%v\"", user.User), nil)
+		res = NewResponse(401, fmt.Errorf("Bad credentials from %v for user: \"%v\"", r.RemoteAddr, user.User), nil)
 	}
 	json.NewEncoder(w).Encode(res)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -10,15 +9,6 @@ type Route struct {
 	Method      string
 	Path        string
 	HandlerFunc http.HandlerFunc
-}
-
-func getRoute(name string) (Route, error) {
-	for _, route := range routes {
-		if route.Name == name {
-			return route, nil
-		}
-	}
-	return Route{}, fmt.Errorf("route not found")
 }
 
 type Routes []Route

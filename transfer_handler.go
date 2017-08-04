@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-type File struct {
+type transferFile struct {
 	File string
 }
 
@@ -19,17 +19,26 @@ func transferRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var res Response
 
+	if r.Body == nil {
+		res = NewResponse(400, fmt.Errorf("No body"), nil)
+	} else {
+		res = NewResponse(200, nil, nil)
+	}
+
+	var file transferFile
+	json.NewDecoder(r.Body).Decode(&file)
+
+	go searchForMatch(file.File)
+
+	json.NewEncoder(w).Encode(res)
+}
+
+// Searches all requests across all groups for a match history torrent that matches file.
+func searchForMatch(file string) {
 	groups, err := allGroups()
 	if err != nil {
-		res = Response{Status{400, err.Error()}, nil}
+		log.Errorf("Failed to get all groups: %v", err)
 	}
-
-	if r.Body == nil {
-		res = Response{Status{400, "No body"}, nil}
-	}
-
-	var file File
-	json.NewDecoder(r.Body).Decode(&file)
 
 	for _, group := range groups {
 		requests, err := group.allRequests()
@@ -46,12 +55,11 @@ func transferRequest(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Compare file to request's match history torrent files.
-			basename := path.Base(file.File)
-			fmt.Println(basename)
+			basename := path.Base(file)
 			var matched = false
 			for i := 0; !matched && i < len(history); i++ {
 
-				// Compare with torrent filename
+				// Compare with torrent file
 				if basename == history[i].Name {
 					matched = true
 					break
@@ -71,20 +79,16 @@ func transferRequest(w http.ResponseWriter, r *http.Request) {
 			}
 
 			go func() {
-				if err := send(request, file.File); err != nil {
-					log.Errorf("Failed to send %v err: %v\n", file.File, err)
+				if err := sendToMachines(request, file); err != nil {
+					log.Errorf("Failed to send %v err: %v\n", file, err)
 				}
 			}()
 		}
 	}
-	if err == nil {
-		res = Response{Status{200, ""}, nil}
-	}
-	json.NewEncoder(w).Encode(res)
 }
 
 // Look up request's requestMachine and start transfer of source file to machines.
-func send(request Request, source string) error {
+func sendToMachines(request Request, source string) error {
 	requestMachines, err := request.AllRequestMachines()
 	if err != nil {
 		return err
